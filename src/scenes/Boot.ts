@@ -29,8 +29,8 @@ export class Boot extends BaseScene
     }
 
     private checkOrientation(orientation: Scale.Orientation): boolean {
-        console.log(orientation);
-        if (orientation === Scale.Orientation.PORTRAIT) {
+        console.log(orientation, Scale.Orientation.LANDSCAPE);
+        if (orientation !== Scale.Orientation.LANDSCAPE) {
             // Show your "Please rotate your device" DOM element or UI graphic here
             let warning = this.add.text(0, 0, 'Rotate your phone to landscape!', {fontFamily: 'Arial', fontSize: 72, color: '#ffffff'})
                 .setStroke("#000000", 4)
