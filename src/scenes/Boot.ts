@@ -32,12 +32,15 @@ export class Boot extends BaseScene
         console.log(orientation);
         if (orientation === Scale.Orientation.PORTRAIT) {
             // Show your "Please rotate your device" DOM element or UI graphic here
-            this.add.text(0, 0, 'Rotate your phone to landscape!', {fontFamily: 'Arial', fontSize: 36, color: '#ffffff'})
+            let warning = this.add.text(0, 0, 'Rotate your phone to landscape!', {fontFamily: 'Arial', fontSize: 72, color: '#ffffff'})
                 .setStroke("#000000", 4)
                 .setScrollFactor(0)
                 .setAlpha(0.0)
                 .setWordWrapWidth(this.getGameWidth() * 0.7)
                 .setAlign('center');
+
+            warning.x = this.getGameWidth() / 2 - warning.displayWidth / 2;
+            warning.y = this.getGameHeight() / 2 - warning.displayHeight / 2;
 
             return false;
             
