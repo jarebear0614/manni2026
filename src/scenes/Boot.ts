@@ -1,6 +1,6 @@
-import { Scene } from 'phaser';
+import { BaseScene } from './BaseScene';
 
-export class Boot extends Scene
+export class Boot extends BaseScene
 {
     constructor ()
     {
@@ -17,6 +17,21 @@ export class Boot extends Scene
 
     create ()
     {
+        if(this.scale.fullscreen.available)
+        {
+            this.scale.startFullscreen();
+            if(screen.orientation && screen.orientation.lock)
+            {
+                screen.orientation.lock('landscape').catch(err => {
+                    this.add.text(0, 0, 'Orientation lock failed: ' + err.toString(), {fontFamily: 'Arial', fontSize: 36, color: '#ffffff'})
+                        .setStroke("#000000", 4)
+                        .setScrollFactor(0)
+                        .setAlpha(0.0)
+                        .setWordWrapWidth(this.getGameWidth() * 0.7)
+                        .setAlign('center');
+                });
+            }
+        }
         this.scene.start('Preloader');
     }
 }
