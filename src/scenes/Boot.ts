@@ -17,12 +17,13 @@ export class Boot extends BaseScene
     }
 
     create ()
-    {     
+    {
+        super.create();
+
         if(!this.checkOrientation(this.scale.orientation))
         {
             this.scale.on('orientationchange', (orientation: Scale.Orientation) =>
             {
-                console.log('here');
                 this.checkOrientation(orientation);
             });
         }
@@ -31,11 +32,9 @@ export class Boot extends BaseScene
     private checkOrientation(orientation: Scale.Orientation): boolean {
         console.log(orientation, Scale.Orientation.LANDSCAPE);
         if (orientation !== Scale.Orientation.LANDSCAPE) {
-            // Show your "Please rotate your device" DOM element or UI graphic here
             let warning = this.add.text(0, 0, 'Rotate your phone to landscape!', {fontFamily: 'Arial', fontSize: 72, color: '#ffffff'})
                 .setStroke("#000000", 4)
                 .setScrollFactor(0)
-                .setAlpha(0.0)
                 .setWordWrapWidth(this.getGameWidth() * 0.7)
                 .setAlign('center');
 
@@ -45,7 +44,6 @@ export class Boot extends BaseScene
             return false;
             
         } else if (orientation === Scale.Orientation.LANDSCAPE) {
-            // Hide the warning and start/resume the game
             this.scene.start('Preloader');
 
             return true;
