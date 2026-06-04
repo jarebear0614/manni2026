@@ -1,0 +1,64 @@
+[
+    {
+        "key": "player_normal",
+        "frames": [0, 1, 2 ,3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "player"
+    },
+    {
+        "key": "bullet",
+        "frames": [0, 1, 2 ,3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "bullet"
+    },
+    {
+        "key": "player_hatch",
+        "frames": [16, 17, 18, 19, 20, 21, 22, 23],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "player"
+    },
+    {
+        "key": "baby_chicken_evil",
+        "frames": [0, 1, 2, 3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "baby_chicken_evil"
+    },
+    {
+        "key": "chicken_evil",
+        "frames": [0, 1, 2, 3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "chicken_evil"
+    },
+    {
+        "key": "chicken_green",
+        "frames": [0, 1, 2, 3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "chicken_green"
+    },
+    {
+        "key": "chicken_pink",
+        "frames": [0, 1, 2, 3],
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "chicken_pink"
+    },
+    {
+        "key": "explosion_player",
+        "frameRate": 8,
+        "repeat": 0,
+        "assetKey": "explosion"
+    },
+    {
+        "key": "explosion_enemy",
+        "frames": [4, 5, 6, 7, 8, 9],
+        "frameRate": 8,
+        "repeat": 0,
+        "assetKey": "explosion_enemy"
+    }
+]

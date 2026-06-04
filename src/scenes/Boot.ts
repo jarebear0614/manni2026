@@ -1,5 +1,6 @@
+import { TextUtility } from '../util/text';
 import { BaseScene } from './BaseScene';
-import { Scale } from 'phaser'
+import { GameObjects, Scale } from 'phaser'
 
 export class Boot extends BaseScene
 {
@@ -10,10 +11,7 @@ export class Boot extends BaseScene
 
     preload ()
     {
-        //  The Boot Scene is typically used to load in any assets you require for your Preloader, such as a game logo or background.
-        //  The smaller the file size of the assets, the better, as the Boot Scene itself has no preloader.
-
-        this.load.image('background', 'assets/bg.png');
+        this.load.json('animations_json', 'assets/data/animations.json');
     }
 
     create ()
@@ -29,17 +27,19 @@ export class Boot extends BaseScene
         }
     }
 
-    private checkOrientation(orientation: Scale.Orientation): boolean {
-        console.log(orientation, Scale.Orientation.LANDSCAPE);
+    private checkOrientation(orientation: Scale.Orientation): boolean 
+    {
         if (orientation !== Scale.Orientation.LANDSCAPE) {
-            let warning = this.add.text(0, 0, 'Rotate your phone to landscape!', {fontFamily: 'Arial', fontSize: 72, color: '#ffffff'})
-                .setStroke("#000000", 4)
-                .setScrollFactor(0)
-                .setWordWrapWidth(this.getGameWidth() * 0.7)
-                .setAlign('center');
-
-            warning.x = this.getGameWidth() / 2 - warning.displayWidth / 2;
-            warning.y = this.getGameHeight() / 2 - warning.displayHeight / 2;
+            TextUtility.addAndCenterTextWithOutline(this, 'Please rotate your phone to landscape.', {
+                fontSize: 72,
+                fontFamily: 'Arial',
+                textColor: '#ffffff',
+                outlineColor: '#000000',
+                outlineSize: 12,
+                wordWrapWidth: this.getGameWidth() * 0.70,
+                useAdvancedWrap: false,
+                textAlign: 'center'
+            });
 
             return false;
             

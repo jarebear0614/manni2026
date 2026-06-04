@@ -1,35 +1,88 @@
-import { Scene } from 'phaser';
+import { Scene, Types } from 'phaser';
+import { BaseScene } from './BaseScene';
+import { Align } from '../util/align';
+import { Player } from '../objects/player';
+import { ChickenPink } from '../objects/enemies/chicken-pink';
+import { DEFAULT_SPRITE_SCALE } from '../config';
+import { ChickenGreen } from '../objects/enemies/chicken-green';
+import { BabyChickenEvil } from '../objects/enemies/baby_chicken_evil';
+import { ChickenEvil } from '../objects/enemies/chicken-evil';
+import { ColliderComponent } from '../components/collider/collider-component';
 
-export class Game extends Scene
+export class Game extends BaseScene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
-    background: Phaser.GameObjects.Image;
-    msg_text : Phaser.GameObjects.Text;
 
     constructor ()
     {
         super('Game');
     }
 
+    preload()
+    {
+
+    }
+
     create ()
     {
+        super.create();
+
         this.camera = this.cameras.main;
-        this.camera.setBackgroundColor(0x00ff00);
 
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
+        const player = new Player(this);
+        Align.scaleContainerToGameWidth(player, DEFAULT_SPRITE_SCALE, this);
 
-        this.msg_text = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
+        const pinkChicken = new ChickenPink(this, this.getGameWidth() * 0.85, this.getGameHeight() / 2 - 8);
+        Align.scaleContainerToGameWidth(pinkChicken, DEFAULT_SPRITE_SCALE, this);
+
+        const greenChicken = new ChickenGreen(this, this.getGameWidth() * 0.85, this.getGameHeight() * 0.10 - 8);
+        Align.scaleContainerToGameWidth(greenChicken, DEFAULT_SPRITE_SCALE, this);
+
+        const evilChicken = new ChickenEvil(this, this.getGameWidth() * 0.85, this.getGameHeight() * 0.30 - 8);
+        Align.scaleContainerToGameWidth(evilChicken, DEFAULT_SPRITE_SCALE, this);
+
+        const evilChickenBaby = new BabyChickenEvil(this, this.getGameWidth() * 0.85, this.getGameHeight() * 0.70- 8);
+        Align.scaleContainerToGameWidth(evilChickenBaby, DEFAULT_SPRITE_SCALE, this);
+
+        this.physics.add.overlap(player, [pinkChicken, greenChicken, evilChicken, evilChickenBaby], (playerGeneric: any, enemyGeneric: any) =>
+        {
+            const player = playerGeneric as Player;
+            if(player)
+            {
+                player.getColliderComponent().collideWithEnemyChicken();
+            }
+
+            if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
+            {
+                const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
+                colliderComponent.collideWithEnemyChicken();
+            }
         });
-        this.msg_text.setOrigin(0.5);
 
-        this.input.once('pointerdown', () => {
+        this.physics.add.overlap(player, pinkChicken.getWeaponGameObjectGroup(), (playerGeneric: any, bulletGeneric: any) =>
+        {
+            const player = playerGeneric as Player;
+            if(player)
+            {
+                player.getColliderComponent().collideWithEnemyEgg();
+            }
 
-            this.scene.start('GameOver');
-
+            pinkChicken.getWeaponComponent().destroyBullet(bulletGeneric);
         });
+
+        this.physics.add.overlap(pinkChicken, player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) =>
+        {
+            if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
+            {
+                const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
+                colliderComponent.collideWithEnemyEgg();
+            }
+
+            player.getWeaponComponent().destroyBullet(playerBullet);
+        });
+    }
+
+    update()
+    {
     }
 }

@@ -1,0 +1,68 @@
+[
+    {
+        "path": "assets/player",
+        "files":
+        [
+            {
+                "type": "spritesheet",
+                "key": "player",
+                "url": "baby_chicken_yellow.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16, "startFrame": 0, "endFrame": 3 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "bullet",
+                "url": "baby_chicken_yellow.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16, "startFrame": 24, "endFrame": 27 }
+            }
+        ]
+    },
+    {
+        "path": "assets/fx",
+        "files":
+        [
+            {
+                "type": "spritesheet",
+                "key": "explosion",
+                "url": "explosion.png",
+                "frameConfig": { "frameWidth": 128, "frameHeight": 128 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "explosion_enemy",
+                "url": "explosion_enemy.png",
+                "frameConfig": { "frameWidth": 64, "frameHeight": 64 }
+            }
+        ]
+    },
+    {
+        "path": "assets/enemies",
+        "files":
+        [
+            {
+                "type": "spritesheet",
+                "key": "baby_chicken_evil",
+                "url": "baby_chicken_evil.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "chicken_evil",
+                "url": "chicken_evil.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "chicken_green",
+                "url": "chicken_green.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "chicken_pink",
+                "url": "chicken_pink.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+            }
+        ]
+    }
+]
