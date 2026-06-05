@@ -15,10 +15,9 @@
     },
     {
         "key": "player_hatch",
-        "frames": [16, 17, 18, 19, 20, 21, 22, 23],
         "frameRate": 8,
-        "repeat": -1,
-        "assetKey": "player"
+        "repeat": 0,
+        "assetKey": "player_hatch"
     },
     {
         "key": "baby_chicken_evil",

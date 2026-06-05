@@ -11,6 +11,12 @@
             },
             {
                 "type": "spritesheet",
+                "key": "player_hatch",
+                "url": "baby_chicken_yellow.png",
+                "frameConfig": { "frameWidth": 16, "frameHeight": 16, "startFrame": 16, "endFrame": 23 }
+            },
+            {
+                "type": "spritesheet",
                 "key": "bullet",
                 "url": "baby_chicken_yellow.png",
                 "frameConfig": { "frameWidth": 16, "frameHeight": 16, "startFrame": 24, "endFrame": 27 }

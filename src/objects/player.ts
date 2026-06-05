@@ -36,7 +36,11 @@ export class Player extends GameObjects.Container
         this.mainSprite = scene.add.sprite(0, 0, 'player').setFlipX(true);
         this.add(this.mainSprite);
 
-        this.mainSprite.play('player_normal');
+        this.mainSprite.play('player_hatch');
+        this.mainSprite.once(Animations.Events.ANIMATION_COMPLETE, () =>
+        {
+            this.mainSprite.play('player_normal');
+        });
 
         this.explosionSprite = scene.add.sprite(0, 0, 'explosion', 0).setVisible(false);
         this.explosionSprite.scale = 1/4;
