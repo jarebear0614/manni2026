@@ -5,10 +5,12 @@ import { EventBusComponent } from "../events/event-bus-component";
 
 export class EnemySpawnerComponent
 {
-    scene: BaseScene;
-    spawnInterval: number;
-    spawnAt: number;
-    group: GameObjects.Group;
+    private scene: BaseScene;
+    private spawnInterval: number;
+    private spawnAt: number;
+    private maxCount: number;
+    private group: GameObjects.Group;
+    private currentSpawned: number = 0;
     
     constructor(scene: BaseScene, enemyClass: Function | null, spawnConfiguration: SpawnConfig, eventBusComponent: EventBusComponent)
     {
@@ -29,14 +31,13 @@ export class EnemySpawnerComponent
 
         this.spawnInterval = spawnConfiguration.interval;
         this.spawnAt = spawnConfiguration.initialSpawnTime;
-
-        this.scene.events.on(Scenes.Events.UPDATE, this.update, this);
+        this.maxCount = spawnConfiguration.maxCount;
+        
         this.scene.physics.world.on(Physics.Arcade.Events.WORLD_STEP, this.worldStep, this);
         this.scene.events.once(
             Scenes.Events.DESTROY, 
             () => 
             { 
-                scene.events.off(Scenes.Events.UPDATE, this.update, this, false); 
                 this.scene.physics.world.off(Physics.Arcade.Events.WORLD_STEP, this.worldStep, this, false);
             }, 
             this);
@@ -47,13 +48,25 @@ export class EnemySpawnerComponent
         return this.group;
     }
 
+    public getMaxCount(): number
+    {
+        return this.maxCount;
+    }
+
     update(timestamp: number, deltaTime: number)
     {
+        if(this.maxCount >= 1 && this.currentSpawned >= this.maxCount)
+        {
+            return;
+        }
+
         this.spawnAt -= deltaTime;
         if(this.spawnAt > 0)
         {
             return;
         }
+
+        this.currentSpawned++;
 
         const y = Phaser.Math.RND.between(30, this.scene.getGameHeight() - 30);
         const enemy: any = this.group.get(this.scene.getGameWidth() + 30, y);
@@ -79,8 +92,7 @@ export class EnemySpawnerComponent
 
             if(transform.x <= -50)
             {
-                transform.setActive(false);
-                transform.setVisible(false);
+                (<any>enemy).healthComponent.die();
             }
         });
     }

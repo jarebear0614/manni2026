@@ -8,6 +8,8 @@ import { ColliderComponent } from "../../components/collider/collider-component"
 import { Align } from "../../util/align";
 import { CUSTOM_EVENTS, EventBusComponent } from "../../components/events/event-bus-component";
 import { EnemyDeathConfig } from "../enemy-death-config";
+import { BabyChickenEvilSpawnerComponent } from "../../components/spawners/baby-chicken-evil-spawner-component";
+import { BabyChickenEvil } from "./baby_chicken_evil";
 
 export class ChickenEvil extends GameObjects.Container
 {
@@ -23,6 +25,9 @@ export class ChickenEvil extends GameObjects.Container
     private colliderComponent: ColliderComponent;
 
     private eventBusComponent: EventBusComponent;
+
+    private static babySpawnerInitialized: boolean = false;
+    private static babyEvilChickenSpawner: BabyChickenEvilSpawnerComponent;
 
     private initialized: boolean = false;
 
@@ -62,6 +67,12 @@ export class ChickenEvil extends GameObjects.Container
 
         this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_INIT, this);
 
+        if(!ChickenEvil.babySpawnerInitialized)
+        {
+            ChickenEvil.babySpawnerInitialized = true;
+            ChickenEvil.babyEvilChickenSpawner = new BabyChickenEvilSpawnerComponent(this.scene as BaseScene, BabyChickenEvil, eventBusComponent);
+        }
+
         this.initialized = true;
     }
 
@@ -76,6 +87,9 @@ export class ChickenEvil extends GameObjects.Container
         {
             this.hide();
             this.setVisible(true);
+
+            ChickenEvil.babyEvilChickenSpawner.spawn(this.x, this.y);
+
             this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_DESTROYED, this);
             return;
         }

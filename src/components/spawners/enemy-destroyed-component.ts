@@ -36,7 +36,6 @@ export class EnemyDestroyedComponent
             {
                 if(frame.index == deathConfig.frameToDisappearEnemy)
                 {
-                    console.log('main visible false');
                     deathConfig.mainSprite.setVisible(false);
                 }
             });

@@ -1,16 +1,18 @@
 import { GameObjects, Scenes, Types } from "phaser";
 import { BaseScene } from "../../scenes/BaseScene";
 import { BotGenericLeftInputComponent } from "../../components/input/bot-generic-input-component";
-import { HorizontalMovementComponent } from "../../components/input/movement/horizontal-movement-component";
-import { DEFAULT_SPRITE_SCALE, ENEMY_PINK_CHICKEN_BULLET_INTERVAL, ENEMY_PINK_CHICKEN_BULLET_LIFESPAN, ENEMY_PINK_CHICKEN_BULLET_MAX, ENEMY_PINK_CHICKEN_BULLET_SCALE, ENEMY_PINK_CHICKEN_BULLET_SPEED, ENEMY_PINK_CHICKEN_HEALTH, ENEMY_PINK_CHICKEN_HORIZONTAL_VELOCITY } from "../../config";
-import { WeaponComponent } from "../../components/weapons/weapon-component";
+import { ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_START, ENEMY_EVIL_CHICKEN_BOSS_HEALTH, ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_VELOCITY, ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_WAVE_FACTOR } from "../../config";
 import { HealthComponent } from "../../components/health/health-component";
 import { ColliderComponent } from "../../components/collider/collider-component";
 import { Align } from "../../util/align";
 import { CUSTOM_EVENTS, EventBusComponent } from "../../components/events/event-bus-component";
 import { EnemyDeathConfig } from "../enemy-death-config";
+import { BabyChickenEvil } from "./baby_chicken_evil";
+import { EnemySpawnerComponent } from "../../components/spawners/enemy-spawner-component";
+import { VerticalWavePatternInputComponent } from "../../components/input/vertical-wave-pattern-input-component";
+import { VerticalMovementComponent } from "../../components/input/movement/vertical-movement-component";
 
-export class ChickenPink extends GameObjects.Container
+export class ChickenEvilBoss extends GameObjects.Container
 {
     private physicsGameObject: Types.Physics.Arcade.GameObjectWithDynamicBody;
 
@@ -18,13 +20,16 @@ export class ChickenPink extends GameObjects.Container
     private explosionSprite: GameObjects.Sprite;
 
     private genericInputLeftComponent: BotGenericLeftInputComponent;
-    private horizontalMovementComponent: HorizontalMovementComponent;
-    private weaponComponent: WeaponComponent;
 
     private healthComponent: HealthComponent;
     private colliderComponent: ColliderComponent;
 
+    private verticalWavePatternInputComponent: VerticalWavePatternInputComponent;
+    private verticalMovementComponent: VerticalMovementComponent;
+
     private eventBusComponent: EventBusComponent;
+
+    private babyEvilChickenSpawner: EnemySpawnerComponent;
 
     private initialized: boolean = false;
 
@@ -37,16 +42,16 @@ export class ChickenPink extends GameObjects.Container
         scene.add.existing(this);
         this.physicsGameObject = scene.physics.add.existing(this) as Types.Physics.Arcade.GameObjectWithDynamicBody;
 
-        this.mainSprite = scene.add.sprite(0, 0, 'chicken_pink');
+        this.mainSprite = scene.add.sprite(0, 0, 'chicken_evil');
         this.add(this.mainSprite);
 
         this.explosionSprite = scene.add.sprite(0, 0, 'explosion_enemy', 0).setVisible(false);
         this.explosionSprite.scale = 2/3;
         this.add(this.explosionSprite);
 
-        Align.scaleContainerToGameWidth(this, DEFAULT_SPRITE_SCALE, scene);
+        Align.scaleContainerToGameWidth(this, 0.30, scene);
 
-        this.mainSprite.play('chicken_pink');
+        this.mainSprite.play('chicken_evil');
 
         scene.events.on(Scenes.Events.UPDATE, this.update, this);
         this.once(GameObjects.Events.DESTROY, () => { scene.events.off(Scenes.Events.UPDATE, this.update, this, false); }, this);
@@ -56,26 +61,24 @@ export class ChickenPink extends GameObjects.Container
     {
         this.eventBusComponent = eventBusComponent;
 
-        this.genericInputLeftComponent = new BotGenericLeftInputComponent();
-        this.horizontalMovementComponent = new HorizontalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.genericInputLeftComponent, ENEMY_PINK_CHICKEN_HORIZONTAL_VELOCITY)
-        this.weaponComponent = new WeaponComponent(
-            this, 
-            this.genericInputLeftComponent, 
-            {
-                speed: ENEMY_PINK_CHICKEN_BULLET_SPEED,
-                lifespan: ENEMY_PINK_CHICKEN_BULLET_LIFESPAN,
-                max: ENEMY_PINK_CHICKEN_BULLET_MAX, 
-                xOffset: -20, 
-                yOffset: 0, 
-                scale: ENEMY_PINK_CHICKEN_BULLET_SCALE,
-                interval: ENEMY_PINK_CHICKEN_BULLET_INTERVAL,
-                flipX: true
-            });
-
-        this.healthComponent = new HealthComponent(ENEMY_PINK_CHICKEN_HEALTH);
+        this.healthComponent = new HealthComponent(ENEMY_EVIL_CHICKEN_BOSS_HEALTH);
         this.colliderComponent = new ColliderComponent(this.healthComponent);
 
+        this.verticalWavePatternInputComponent = new VerticalWavePatternInputComponent(ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_WAVE_FACTOR);
+        this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.verticalWavePatternInputComponent, ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_VELOCITY)
+
         this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_INIT, this);
+
+        this.babyEvilChickenSpawner = new EnemySpawnerComponent(
+            this.scene as BaseScene, 
+            BabyChickenEvil, 
+            {
+                interval: ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_INTERVAL,
+                initialSpawnTime: ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_START,
+                maxCount: -1
+            }, eventBusComponent);
+
+        eventBusComponent.emit(CUSTOM_EVENTS.GROUP_INIT, this.babyEvilChickenSpawner.getGroup());
 
         this.initialized = true;
     }
@@ -91,22 +94,15 @@ export class ChickenPink extends GameObjects.Container
         {
             this.hide();
             this.setVisible(true);
+
             this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_DESTROYED, this);
             return;
         }
+        
+        this.babyEvilChickenSpawner.update(timestamp, deltaTime);
 
-        this.horizontalMovementComponent.update();
-        this.weaponComponent.update(deltaTime);
-    }
-
-    public getWeaponComponent() 
-    {
-        return this.weaponComponent;
-    }
-
-    public getWeaponGameObjectGroup() 
-    {
-        return this.weaponComponent.getBulletGroup();
+        this.verticalWavePatternInputComponent.update(timestamp, deltaTime);
+        this.verticalMovementComponent.update();
     }
 
     public getColliderComponent() 
@@ -130,15 +126,14 @@ export class ChickenPink extends GameObjects.Container
         this.setActive(true);
         this.setVisible(true);
         this.healthComponent.reset();
-        this.horizontalMovementComponent.reset();
         this.explosionSprite.setVisible(false);
         this.mainSprite.setVisible(true);
     }
-
+    
     public getEnemyDeathConfig(): EnemyDeathConfig
     {
         return {
-            mainAssetKey: 'chicken_pink',
+            mainAssetKey: 'chicken_evil',
             mainSprite: this.mainSprite,
             deathAnimationAssetKey: 'explosion_enemy',
             currentFrame: this.mainSprite.anims.currentFrame?.index ?? 0,
