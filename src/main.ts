@@ -13,7 +13,7 @@ const config: Types.Core.GameConfig = {
     width: 1280,
     height: 720,
     parent: 'game-container',
-    backgroundColor: '#028af8',
+    backgroundColor: '#000',
     input:
     {
         activePointers: 3

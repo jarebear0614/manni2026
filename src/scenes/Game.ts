@@ -3,7 +3,7 @@ import { BaseScene } from './BaseScene';
 import { Align } from '../util/align';
 import { Player } from '../objects/player';
 import { ChickenPink } from '../objects/enemies/chicken-pink';
-import { DEFAULT_SPRITE_SCALE, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START, ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_PINK_CHICKEN_GROUP_SPAWN_START } from '../config';
+import { BOSS_DESTROYED_SCORE, DEFAULT_SPRITE_SCALE, ENEMY_DESTROYED_SCORE, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START, ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_PINK_CHICKEN_GROUP_SPAWN_START, LIVES_LOST_SCORE } from '../config';
 import { ChickenGreen } from '../objects/enemies/chicken-green';
 import { BabyChickenEvil } from '../objects/enemies/baby-chicken-evil';
 import { ChickenEvil } from '../objects/enemies/chicken-evil';
@@ -14,6 +14,7 @@ import { EnemyDestroyedComponent } from '../components/spawners/enemy-destroyed-
 import { GroupEnemyOrchestrator } from '../components/spawners/group-enemy-orchestrator';
 import { ChickenEvilBoss } from '../objects/enemies/chicken-evil-boss';
 import { HealthComponent } from '../components/health/health-component';
+import WebFont from 'webfontloader';
 
 export class Game extends BaseScene
 {
@@ -37,19 +38,45 @@ export class Game extends BaseScene
     private downOnScreen: GameObjects.Image;
     private shootOnScreen: GameObjects.Image;
 
-    private enemiesDestroyed: number;
-    private livesLost: number;
+    private enemiesDestroyed: number = 0;
+    private livesLost: number = 0;
 
     private hearts: GameObjects.Sprite[] = [];
+
+    private fadeOutRect: GameObjects.Rectangle;
+    
+    private endTextEnemiesDestroyedCategory: GameObjects.Text;
+    private endTextEnemiesDestroyedScore: GameObjects.Text;
+
+    private endTextBossDestroyedCategory: GameObjects.Text;
+    private endTextBossDestroyedScore: GameObjects.Text;
+    
+    private endTextLivesLostCategory: GameObjects.Text;
+    private endTextLivesLostScore: GameObjects.Text;
+
+    private endTextTotalCategory: GameObjects.Text;
+    private endTextTotalScore: GameObjects.Text;
+
+    private myLoveForYouCategory: GameObjects.Text;
+    private myLoveForYouScore: GameObjects.Text;
+
+    private underline: GameObjects.Line;
 
     constructor ()
     {
         super('Game');
     }
 
+    init(data: any)
+    {
+        console.log('inject');
+        this.injectFont();
+    }
+
     preload()
     {
-
+        console.log('preload');
+        this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
     }
 
     create ()
@@ -63,6 +90,8 @@ export class Game extends BaseScene
         this.configureBackgrounds();
         this.configureOnscreenControls();
         this.configureHUD();
+        this.createFont();
+        this.createEndTextObjects();
 
         const player = this.player = new Player(this, eventBusComponent, 
             {
@@ -71,7 +100,14 @@ export class Game extends BaseScene
                 shootOnScreen: this.shootOnScreen
             }
         );
-        this.wireEvents(eventBusComponent, player);        
+        this.wireEvents(eventBusComponent, player);
+
+        this.fadeOutRect = this.add.rectangle(0, 0, this.getGameWidth() * 1.02, this.getGameHeight() * 1.02, 0x000)
+            .setScrollFactor(0, 0)
+            .setOrigin(0, 0)
+            .setAlpha(0)
+            .setDepth(3);
+
     }
 
     private configureOnscreenControls() 
@@ -99,36 +135,36 @@ export class Game extends BaseScene
                     initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
-            ],
-            [
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 2
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenGreen, {
-                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent)
-            ],
-            [
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenEvil, {
-                    interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 2
-                }, eventBusComponent)
-            ],
+            ]
+            // [
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 2
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenGreen, {
+            //         interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent)
+            // ],
+            // [
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenEvil, {
+            //         interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 2
+            //     }, eventBusComponent)
+            //],
         ]);
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);
@@ -179,6 +215,8 @@ export class Game extends BaseScene
                 }
 
                 player.getWeaponComponent().destroyBullet(playerBullet);
+
+                this.enemiesDestroyed++;
             }));
         });
 
@@ -219,17 +257,14 @@ export class Game extends BaseScene
                         }
 
                         player.getWeaponComponent().destroyBullet(playerBullet);
+
+                        this.enemiesDestroyed++;
                     }));
                 });
             }
             else {
                 this.spawnBoss();
             }
-        });
-
-        this.eventBusComponent.on(CUSTOM_EVENTS.ENEMY_DESTROYED, () => 
-        {
-            this.enemiesDestroyed++;
         });
 
         this.eventBusComponent.on(CUSTOM_EVENTS.PLAYER_DEAD, () =>
@@ -310,45 +345,9 @@ export class Game extends BaseScene
         {
             if(enemy.name === "ChickenEvilBoss")
             {
-                console.log('boss destroyed');
+                this.triggerEndScreen();
             }
         }, this);
-
-        this.physics.add.overlap(this.player, this.boss, (playerGeneric: any, enemyGeneric: any) =>
-        {
-            if(!playerGeneric.active || !enemyGeneric.active)
-            {
-                return;
-            }
-            
-            const player = playerGeneric as Player;
-            if(player)
-            {
-                player.getColliderComponent().collideWithEnemyChicken();
-            }
-
-            if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-            {
-                const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
-                colliderComponent.collideWithEnemyChicken();
-            }
-        });
-
-        this.overlaps.push(this.physics.add.overlap(this.boss, this.player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) =>
-        {
-            if(!enemyGeneric.active || !playerBullet.active)
-            {
-                return;
-            }
-
-            if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-            {
-                const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
-                colliderComponent.collideWithEnemyEgg();
-            }
-
-            this.player.getWeaponComponent().destroyBullet(playerBullet);
-        }));
 
         let t = this.tweens.add({
             targets: this.boss,
@@ -366,8 +365,261 @@ export class Game extends BaseScene
             this.time.delayedCall(2000, () =>
             {
                 this.player.unpause();
-                this.boss!.startVerticalMovement();
+                this.boss!.startVerticalMovement();                
+
+                this.physics.add.overlap(this.player, this.boss!, (playerGeneric: any, enemyGeneric: any) =>
+                {
+                    if(!playerGeneric.active || !enemyGeneric.active)
+                    {
+                        return;
+                    }
+                    
+                    const player = playerGeneric as Player;
+                    if(player)
+                    {
+                        player.getColliderComponent().collideWithEnemyChicken();
+                    }
+
+                    if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
+                    {
+                        const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
+                        colliderComponent.collideWithEnemyChicken();
+                    }
+                });
+
+                this.overlaps.push(this.physics.add.overlap(this.boss!, this.player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) =>
+                {
+                    if(!enemyGeneric.active || !playerBullet.active)
+                    {
+                        return;
+                    }
+
+                    if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
+                    {
+                        const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
+                        colliderComponent.collideWithEnemyEgg();
+                    }
+
+                    this.player.getWeaponComponent().destroyBullet(playerBullet);
+                }));
             });
         }
+    }
+
+    private triggerEndScreen()
+    {
+        this.player.pause();
+
+        const enemiesDestroyedScore = this.enemiesDestroyed * ENEMY_DESTROYED_SCORE;
+        const livesLostScore = this.livesLost * LIVES_LOST_SCORE;
+        const totalScore = enemiesDestroyedScore + BOSS_DESTROYED_SCORE - livesLostScore;
+
+        this.endTextEnemiesDestroyedScore.text = enemiesDestroyedScore.toString().padStart(8, '0');
+        this.endTextLivesLostScore.text = livesLostScore.toString().padStart(8, '0');
+        this.endTextTotalScore.text = totalScore.toString().padStart(8, '0');
+
+        let t = this.tweens.add({
+            targets: this.fadeOutRect,
+            alpha: { from: 0, to: 0.50 },
+            ease: 'Linear',
+            duration: 2000,
+            repeat: 0,
+            yoyo: false
+        });
+
+        t.onCompleteHandler = () =>
+        {
+            this.tweens.killTweensOf(this.fadeOutRect);
+
+            this.tweens.add({
+                targets: this.endTextEnemiesDestroyedCategory,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 300
+            });
+
+            this.tweens.add({
+                targets: this.endTextEnemiesDestroyedScore,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 300
+            });
+
+            this.tweens.add({
+                targets: this.endTextBossDestroyedCategory,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 1300
+            });
+
+            this.tweens.add({
+                targets: this.endTextBossDestroyedScore,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 1300,
+            });
+
+            this.tweens.add({
+                targets: this.endTextLivesLostCategory,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 2300
+            });
+
+            this.tweens.add({
+                targets: this.endTextLivesLostScore,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 2300
+            });
+
+            this.tweens.add({
+                targets: this.underline,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false,
+                delay: 2300
+            });
+
+            this.tweens.add({
+                targets: this.endTextTotalCategory,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 200,
+                repeat: 0,
+                yoyo: false,
+                delay: 3500,
+                startDelay: 3500,
+                onStart: () =>
+                {
+                    this.camera.shake(100, 0.001);
+                }
+            });
+
+            this.tweens.add({
+                targets: this.endTextTotalScore,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 200,
+                repeat: 0,
+                yoyo: false,
+                delay: 3500
+            });
+
+            this.tweens.add({
+                targets: this.myLoveForYouCategory,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1200,
+                repeat: 0,
+                yoyo: false,
+                delay: 4000
+            });
+
+            this.tweens.add({
+                targets: this.myLoveForYouScore,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1200,
+                repeat: 0,
+                yoyo: false,
+                delay: 4000
+            });
+        }
+    }
+
+    private injectFont() {
+        const element = document.createElement('style');
+        document.head.appendChild(element);
+        const sheet = element.sheet;
+
+        if (sheet) {
+            let styles = '@font-face { font-family: "quartz"; src: url("assets/font/QuartzMSRegular.TTF") format("TrueType"); }\n';
+            sheet.insertRule(styles, 0);
+        }
+    }
+
+    private createFont()
+    {
+        WebFont.load({
+            custom: {
+                families: [ 'quartz' ]
+            },
+            active: () =>
+            {
+                // this.add.text(this.holdTopLeft.x, this.holdTopLeft.y, 'Click here \nto hold piece', { fontFamily: 'quartz', fontSize: 16, color: '#ffffff' })
+                // this.add.text(this.nextTopLeft.x, this.nextTopLeft.y, 'next', { fontFamily: 'quartz', fontSize: 16, color: '#ffffff' })
+
+                // for(let f of this.textActiveFunctions)
+                // {
+                //     f();
+                // }
+            }
+        });
+    }
+
+    private createEndTextObjects()
+    {
+        this.endTextEnemiesDestroyedCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.20, 'ENEMIES DESTROYED', {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}).setAlpha(0.0).setDepth(4);
+        this.endTextEnemiesDestroyedScore = this.add.text(
+                                            this.getGameWidth() * 0.60, 
+                                            this.getGameHeight() * 0.20, 
+                                            this.enemiesDestroyed.toString().padStart(8, '0'), 
+                                            {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}
+                                        ).setAlign('right').setAlpha(0.0).setDepth(4);
+
+        this.endTextBossDestroyedCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.30, 'BOSS DESTROYED', {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}).setAlpha(0.0).setDepth(4);
+        this.endTextBossDestroyedScore = this.add.text(
+                                            this.getGameWidth() * 0.60, 
+                                            this.getGameHeight() * 0.30, 
+                                            BOSS_DESTROYED_SCORE.toString().padStart(8, '0'), 
+                                            {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}
+                                        ).setAlign('right').setAlpha(0.0).setDepth(4);
+
+        this.endTextLivesLostCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.40, 'LIVES LOST', {fontFamily: 'Quartz', fontSize: 36, color: '#ff0000'}).setAlpha(0.0).setDepth(4);
+        this.endTextLivesLostScore = this.add.text(
+                                            this.getGameWidth() * 0.60, 
+                                            this.getGameHeight() * 0.40, 
+                                            this.enemiesDestroyed.toString().padStart(8, '0'), 
+                                            {fontFamily: 'Quartz', fontSize: 36, color: '#ff0000'}
+                                        ).setAlign('right').setAlpha(0.0).setDepth(4);
+
+        this.underline = this.add.line(0, 0, this.getGameWidth() * 0.60, this.getGameHeight() * 0.41 + this.endTextLivesLostScore.displayHeight, this.getGameWidth() * 0.60 + this.endTextLivesLostScore.displayWidth, this.getGameHeight() * 0.41 + this.endTextLivesLostScore.displayHeight, 0xFFFFFF).setOrigin(0, 0).setAlpha(0.0).setDepth(4);
+
+        this.endTextTotalCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.50, 'TOTAL', {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}).setAlpha(0.0).setDepth(4);
+        this.endTextTotalScore = this.add.text(
+                                            this.getGameWidth() * 0.60, 
+                                            this.getGameHeight() * 0.50, 
+                                            this.enemiesDestroyed.toString().padStart(8, '0'), 
+                                            {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}
+                                        ).setAlign('right').setAlpha(0.0).setDepth(4);
+        
+        this.myLoveForYouCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.60, 'MY LOVE FOR YOU', {fontFamily: 'Quartz', fontSize: 36, color: '#00FF00'}).setAlpha(0.0).setDepth(4);
+        this.myLoveForYouScore = this.add.text(
+                                            this.getGameWidth() * 0.60, 
+                                            this.getGameHeight() * 0.60, 
+                                            '(∞π)²', 
+                                            {fontFamily: 'Quartz', fontSize: 36, color: '#00ff00'}
+                                        ).setAlign('right').setAlpha(0.0).setDepth(4);
     }
 }
