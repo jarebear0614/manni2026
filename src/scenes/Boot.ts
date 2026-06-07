@@ -18,6 +18,8 @@ export class Boot extends BaseScene
     {
         super.create();
 
+        this.scale.setParentSize(window.innerWidth, window.innerHeight);
+
         if(!this.checkOrientation(this.scale.orientation))
         {
             this.scale.on('orientationchange', (orientation: Scale.Orientation) =>
