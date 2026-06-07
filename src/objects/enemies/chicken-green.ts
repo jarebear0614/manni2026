@@ -29,6 +29,7 @@ export class ChickenGreen extends GameObjects.Container
     private eventBusComponent: EventBusComponent;
 
     private initialized: boolean = false;
+    private tinting: boolean = false;
 
     constructor(scene: BaseScene, x: number, y: number)
     {
@@ -67,7 +68,27 @@ export class ChickenGreen extends GameObjects.Container
         this.horizontalMovementComponent = new HorizontalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.genericInputLeftComponent, ENEMY_GREEN_CHICKEN_HORIZONTAL_VELOCITY)
         this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.verticalWavePatternInputComponent, ENEMY_GREEN_CHICKEN_VERTICAL_VELOCITY)
 
+        if(this.healthComponent)
+        {
+            this.healthComponent.removeAllListeners();
+        }
+
         this.healthComponent = new HealthComponent(ENEMY_GREEN_CHICKEN_HEALTH);
+        this.healthComponent.on(HealthComponent.Events.HIT, () =>
+        {
+            if(this.tinting)
+            {
+                return;
+            }
+
+            this.tinting = true;
+            this.mainSprite.setTint(0xFF00000);
+            this.scene.time.delayedCall(50, () => 
+            {
+                this.mainSprite.setTint(0xFFFFFF);
+                this.tinting = false;
+            });
+        });
         this.colliderComponent = new ColliderComponent(this.healthComponent);
 
         this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_INIT, this);

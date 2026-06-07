@@ -1,11 +1,19 @@
-export class HealthComponent 
+import { Events } from "phaser";
+
+export class HealthComponent extends Events.EventEmitter
 {
+    public static Events = Object.freeze({
+        HIT: 'HIT'
+    });
+
     protected max: number;
     protected current: number;
     protected dead: boolean;
 
     constructor(life:number)
     {
+        super();
+
         this.max = life;
         this.current = life;
         this.dead = false;
@@ -32,6 +40,10 @@ export class HealthComponent
         if(this.current <= 0)
         {
             this.dead = true;
+        }
+        else
+        {
+            this.emit(HealthComponent.Events.HIT);
         }
     }
 

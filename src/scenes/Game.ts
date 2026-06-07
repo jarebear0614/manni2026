@@ -69,13 +69,11 @@ export class Game extends BaseScene
 
     init(data: any)
     {
-        console.log('inject');
         this.injectFont();
     }
 
     preload()
     {
-        console.log('preload');
         this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
     }
 
@@ -114,7 +112,6 @@ export class Game extends BaseScene
         let directionsTopLeft = {x: this.getGameWidth() * .08, y: this.getGameHeight() * .75};
         this.upOnScreen = this.add.image(0, 0, 'up').setInteractive({useHandCursor: true}).setScrollFactor(0);
         this.downOnScreen = this.add.image(0, 0, 'down').setInteractive({useHandCursor: true}).setScrollFactor(0);
-        
         this.shootOnScreen = this.add.image(this.getGameWidth() * 0.92, this.getGameHeight() * 0.88, 'abutton').setInteractive({useHandCursor: true}).setScrollFactor(0);
 
         Align.scaleToGameWidth(this.upOnScreen, 0.06, this);
@@ -134,36 +131,36 @@ export class Game extends BaseScene
                     initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
-            ]
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenGreen, {
-            //         interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent)
-            // ],
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenEvil, {
-            //         interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent)
-            //],
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenEvil, {
+                    interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent)
+            ],
         ]);
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);

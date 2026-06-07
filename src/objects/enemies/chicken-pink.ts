@@ -21,12 +21,13 @@ export class ChickenPink extends GameObjects.Container
     private horizontalMovementComponent: HorizontalMovementComponent;
     private weaponComponent: WeaponComponent;
 
-    private healthComponent: HealthComponent;
+    private healthComponent?: HealthComponent;
     private colliderComponent: ColliderComponent;
 
     private eventBusComponent: EventBusComponent;
 
     private initialized: boolean = false;
+    private tinting: boolean = false;
 
     constructor(scene: BaseScene, x: number, y: number)
     {
@@ -72,7 +73,28 @@ export class ChickenPink extends GameObjects.Container
                 flipX: true
             });
 
+        if(this.healthComponent)
+        {
+            this.healthComponent.removeAllListeners();
+        }
+
         this.healthComponent = new HealthComponent(ENEMY_PINK_CHICKEN_HEALTH);
+        this.healthComponent.on(HealthComponent.Events.HIT, () =>
+        {
+            if(this.tinting)
+            {
+                return;
+            }
+
+            this.tinting = true;
+            this.mainSprite.setTint(0xFF00000);
+            this.scene.time.delayedCall(50, () => 
+            {
+                this.mainSprite.setTint(0xFFFFFF);
+                this.tinting = false;
+            });
+        });
+
         this.colliderComponent = new ColliderComponent(this.healthComponent);
 
         this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_INIT, this);
@@ -87,7 +109,7 @@ export class ChickenPink extends GameObjects.Container
             return;
         }
         
-        if(this.healthComponent.isDead())
+        if(this.healthComponent && this.healthComponent.isDead())
         {
             this.hide();
             this.setVisible(true);
@@ -129,7 +151,7 @@ export class ChickenPink extends GameObjects.Container
     {
         this.setActive(true);
         this.setVisible(true);
-        this.healthComponent.reset();
+        this.healthComponent?.reset();
         this.horizontalMovementComponent.reset();
         this.explosionSprite.setVisible(false);
         this.mainSprite.setVisible(true);

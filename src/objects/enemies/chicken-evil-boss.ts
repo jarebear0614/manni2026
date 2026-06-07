@@ -1,6 +1,5 @@
 import { GameObjects, Scenes, Types } from "phaser";
 import { BaseScene } from "../../scenes/BaseScene";
-import { BotGenericLeftInputComponent } from "../../components/input/bot-generic-input-component";
 import { ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_BOSS_GROUP_SPAWN_START, ENEMY_EVIL_CHICKEN_BOSS_HEALTH, ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_VELOCITY, ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_WAVE_FACTOR } from "../../config";
 import { HealthComponent } from "../../components/health/health-component";
 import { ColliderComponent } from "../../components/collider/collider-component";
@@ -19,8 +18,6 @@ export class ChickenEvilBoss extends GameObjects.Container
     private mainSprite: GameObjects.Sprite;
     private explosionSprite: GameObjects.Sprite;
 
-    private genericInputLeftComponent: BotGenericLeftInputComponent;
-
     private healthComponent: HealthComponent;
     private colliderComponent: ColliderComponent;
 
@@ -33,6 +30,7 @@ export class ChickenEvilBoss extends GameObjects.Container
 
     private initialized: boolean = false;
     private isMovementRunning: boolean = false;
+    private tinting: boolean = false;
 
     constructor(scene: BaseScene, x: number, y: number)
     {
@@ -63,7 +61,28 @@ export class ChickenEvilBoss extends GameObjects.Container
     {
         this.eventBusComponent = eventBusComponent;
 
+        if(this.healthComponent)
+        {
+            this.healthComponent.removeAllListeners();
+        }
+
         this.healthComponent = new HealthComponent(ENEMY_EVIL_CHICKEN_BOSS_HEALTH);
+        this.healthComponent.on(HealthComponent.Events.HIT, () =>
+        {
+            if(this.tinting)
+            {
+                return;
+            }
+
+            this.tinting = true;
+            this.mainSprite.setTint(0xFF00000);
+            this.scene.time.delayedCall(50, () => 
+            {
+                this.mainSprite.setTint(0xFFFFFF);
+                this.tinting = false;
+            });
+        });
+
         this.colliderComponent = new ColliderComponent(this.healthComponent);
 
         this.verticalWavePatternInputComponent = new VerticalWavePatternInputComponent(ENEMY_EVIL_CHICKEN_BOSS_VERTICAL_WAVE_FACTOR);
