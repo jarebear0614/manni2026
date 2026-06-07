@@ -25,7 +25,7 @@ export class Player extends GameObjects.Container
 
     constructor(scene: BaseScene, upOnScreen: GameObjects.Image, downOnScreen: GameObjects.Image, shootOnScreen: GameObjects.Image)
     {
-        super(scene, scene.getGameWidth() * 0.10, scene.getGameHeight() / 2 - 8, []);
+        super(scene, scene.getGameWidth() * 0.18, scene.getGameHeight() / 2 - 8, []);
 
         this.setSize(16, 16);
 
