@@ -26,6 +26,12 @@ export class Game extends BaseScene
     eventBusComponent: EventBusComponent;
     boss?: ChickenEvilBoss;
 
+    bg1: GameObjects.TileSprite;
+    bg2: GameObjects.TileSprite;
+    bg3: GameObjects.TileSprite;
+    bg4: GameObjects.TileSprite;
+    bg5: GameObjects.TileSprite;
+
     constructor ()
     {
         super('Game');
@@ -43,14 +49,20 @@ export class Game extends BaseScene
         this.camera = this.cameras.main;        
 
         const eventBusComponent: EventBusComponent = this.eventBusComponent = new EventBusComponent();
+
+        this.configureBackgrounds();       
+
         const player = this.player = new Player(this);
-        Align.scaleContainerToGameWidth(player, DEFAULT_SPRITE_SCALE, this);
-        
+        this.wireEvents(eventBusComponent, player);        
+    }
+
+    private wireEvents(eventBusComponent: EventBusComponent, player: Player) 
+    {
         this.orchestrator = new GroupEnemyOrchestrator(this, eventBusComponent, [
             [
                 new EnemySpawnerComponent(this, ChickenPink, {
                     interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
             ]
@@ -87,58 +99,47 @@ export class Game extends BaseScene
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);
 
-        eventBusComponent.on(CUSTOM_EVENTS.ENEMY_INIT, (enemy: any) =>
+        eventBusComponent.on(CUSTOM_EVENTS.ENEMY_INIT, (enemy: any) => 
         {
-            if(enemy.getWeaponGameObjectGroup && typeof(enemy.getWeaponGameObjectGroup) === 'function')
-            {
-                this.physics.add.overlap(player, enemy.getWeaponGameObjectGroup(), (playerGeneric: any, enemyBullet: any) =>
-                {
-                    if(!playerGeneric.active || !enemyBullet.active)
-                    {
+            if (enemy.getWeaponGameObjectGroup && typeof (enemy.getWeaponGameObjectGroup) === 'function') {
+                this.physics.add.overlap(player, enemy.getWeaponGameObjectGroup(), (playerGeneric: any, enemyBullet: any) => {
+                    if (!playerGeneric.active || !enemyBullet.active) {
                         return;
                     }
 
                     player.getColliderComponent().collideWithEnemyEgg();
-                    
-                    if(enemy.getWeaponComponent && typeof(enemy.getWeaponComponent) === 'function')
-                    {
+
+                    if (enemy.getWeaponComponent && typeof (enemy.getWeaponComponent) === 'function') {
                         enemy.getWeaponComponent().destroyBullet(enemyBullet);
                     }
-                });   
+                });
             }
         });
 
-        eventBusComponent.on(CUSTOM_EVENTS.GROUP_INIT, (group: GameObjects.Group) =>
+        eventBusComponent.on(CUSTOM_EVENTS.GROUP_INIT, (group: GameObjects.Group) => 
         {
-            this.overlaps.push(this.physics.add.overlap(player, group, (playerGeneric: any, enemyGeneric: any) =>
-            {
-                if(!playerGeneric.active || !enemyGeneric.active)
-                {
+            this.overlaps.push(this.physics.add.overlap(player, group, (playerGeneric: any, enemyGeneric: any) => {
+                if (!playerGeneric.active || !enemyGeneric.active) {
                     return;
                 }
-                
+
                 const player = playerGeneric as Player;
-                if(player)
-                {
+                if (player) {
                     player.getColliderComponent().collideWithEnemyChicken();
                 }
 
-                if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-                {
+                if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                     const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                     colliderComponent.collideWithEnemyChicken();
                 }
             }));
 
-            this.overlaps.push(this.physics.add.overlap(group, player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) =>
-            {
-                if(!enemyGeneric.active || !playerBullet.active)
-                {
+            this.overlaps.push(this.physics.add.overlap(group, player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) => {
+                if (!enemyGeneric.active || !playerBullet.active) {
                     return;
                 }
 
-                if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-                {
+                if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                     const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                     colliderComponent.collideWithEnemyEgg();
                 }
@@ -147,48 +148,38 @@ export class Game extends BaseScene
             }));
         });
 
-        this.orchestrator.on(GroupEnemyOrchestrator.Events.WAVE_CHANGE, (next: EnemySpawnerComponent[] | null, previous: EnemySpawnerComponent[] | null) =>
+        this.orchestrator.on(GroupEnemyOrchestrator.Events.WAVE_CHANGE, (next: EnemySpawnerComponent[] | null, previous: EnemySpawnerComponent[] | null) => 
         {
-            this.overlaps.forEach((overlap) =>
-            {
+            this.overlaps.forEach((overlap) => {
                 overlap.destroy();
             });
 
             this.overlaps = [];
 
-            if(next !== null)
-            {
-                next.forEach( (spawner) =>
-                {
-                    this.overlaps.push(this.physics.add.overlap(player, spawner.getGroup(), (playerGeneric: any, enemyGeneric: any) =>
-                    {
-                        if(!playerGeneric.active || !enemyGeneric.active)
-                        {
+            if (next !== null) {
+                next.forEach((spawner) => {
+                    this.overlaps.push(this.physics.add.overlap(player, spawner.getGroup(), (playerGeneric: any, enemyGeneric: any) => {
+                        if (!playerGeneric.active || !enemyGeneric.active) {
                             return;
                         }
-                        
+
                         const player = playerGeneric as Player;
-                        if(player)
-                        {
+                        if (player) {
                             player.getColliderComponent().collideWithEnemyChicken();
                         }
 
-                        if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-                        {
+                        if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                             const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                             colliderComponent.collideWithEnemyChicken();
                         }
                     }));
 
-                    this.overlaps.push(this.physics.add.overlap(spawner.getGroup(), player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) =>
-                    {
-                        if(!enemyGeneric.active || !playerBullet.active)
-                        {
+                    this.overlaps.push(this.physics.add.overlap(spawner.getGroup(), player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) => {
+                        if (!enemyGeneric.active || !playerBullet.active) {
                             return;
                         }
 
-                        if(enemyGeneric.getColliderComponent && typeof(enemyGeneric.getColliderComponent) === 'function')
-                        {
+                        if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                             const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                             colliderComponent.collideWithEnemyEgg();
                         }
@@ -197,23 +188,52 @@ export class Game extends BaseScene
                     }));
                 });
             }
-            else
-            {
+
+            else {
                 this.spawnBoss();
-            }            
+            }
         });
 
-        this.orchestrator.start();        
+        this.orchestrator.start();
     }
 
-    update()
+    update(timestamp: number, deltaTime: number)
     {
+        this.bg2.tilePositionX += deltaTime * 0.010;
+        this.bg3.tilePositionX += deltaTime * 0.020;
+        this.bg4.tilePositionX += deltaTime * 0.030;
+        this.bg5.tilePositionX += deltaTime * 0.040;
+    }
+
+    private configureBackgrounds()
+    {
+        this.bg1 = this.add.tileSprite(0, -100, 0, 0, 'bg1').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg2 = this.add.tileSprite(0, 0, 0, 0, 'bg2').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg3 = this.add.tileSprite(0, 0, 0, 0, 'bg3').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg4 = this.add.tileSprite(0, 0, 0, 0, 'bg4').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg5 = this.add.tileSprite(0, 0, 0, 0, 'bg5').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg1.setScale(this.getGameWidth() / this.bg1.displayWidth, this.getGameHeight() / this.bg1.displayHeight);
+        this.bg2.setScale(this.getGameWidth() / this.bg2.displayWidth, this.getGameHeight() / this.bg2.displayHeight);
+        this.bg3.setScale(this.getGameWidth() / this.bg3.displayWidth, this.getGameHeight() / this.bg3.displayHeight);
+        this.bg4.setScale(this.getGameWidth() / this.bg4.displayWidth, this.getGameHeight() / this.bg4.displayHeight);
+        this.bg5.setScale(this.getGameWidth() / this.bg5.displayWidth, this.getGameHeight() / this.bg5.displayHeight);
     }
 
     private spawnBoss()
     {
-        this.boss = new ChickenEvilBoss(this, this.getGameWidth() * 0.70, this.getGameHeight() / 2);
+        this.boss = new ChickenEvilBoss(this, this.getGameWidth() + 300, this.getGameHeight() / 2);
         this.boss.init(this.eventBusComponent);
+
+        this.player.pause();
+
+        this.orchestrator.removeAllListeners();
+        this.eventBusComponent.on(CUSTOM_EVENTS.ENEMY_DESTROYED, (enemy: GameObjects.GameObject) => 
+        {
+            if(enemy.name === "ChickenEvilBoss")
+            {
+                console.log('boss destroyed');
+            }
+        }, this);
 
         this.physics.add.overlap(this.player, this.boss, (playerGeneric: any, enemyGeneric: any) =>
         {
@@ -250,5 +270,25 @@ export class Game extends BaseScene
 
             this.player.getWeaponComponent().destroyBullet(playerBullet);
         }));
+
+        let t = this.tweens.add({
+            targets: this.boss,
+            x: { from: this.boss.x, to: this.getGameWidth() * 0.70 },
+            ease: 'Linear',
+            duration: 10000,
+            repeat: 0,
+            yoyo: false
+        });
+
+        this.cameras.main.shake(12000, 0.005, true);
+        t.onCompleteHandler = () =>
+        {
+            this.tweens.killTweensOf(this.boss!);
+            this.time.delayedCall(2000, () =>
+            {
+                this.player.unpause();
+                this.boss!.startVerticalMovement();
+            });
+        }
     }
 }

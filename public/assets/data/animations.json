@@ -59,5 +59,11 @@
         "frameRate": 8,
         "repeat": 0,
         "assetKey": "explosion_enemy"
+    },
+    {
+        "key": "chicken_boss",
+        "frameRate": 8,
+        "repeat": -1,
+        "assetKey": "chicken_boss"
     }
 ]

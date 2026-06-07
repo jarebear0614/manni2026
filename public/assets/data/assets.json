@@ -42,6 +42,37 @@
         ]
     },
     {
+        "path": "assets/bg",
+        "files":
+        [
+            {
+                "type": "image",
+                "key": "bg1",
+                "url": "Layer 1.png"
+            },
+            {
+                "type": "image",
+                "key": "bg2",
+                "url": "Layer 2.png"
+            },
+            {
+                "type": "image",
+                "key": "bg3",
+                "url": "Layer 3.png"
+            },
+            {
+                "type": "image",
+                "key": "bg4",
+                "url": "Layer 4.png"
+            },
+            {
+                "type": "image",
+                "key": "bg5",
+                "url": "Layer 5.png"
+            }
+        ]
+    },
+    {
         "path": "assets/enemies",
         "files":
         [
@@ -68,6 +99,12 @@
                 "key": "chicken_pink",
                 "url": "chicken_pink.png",
                 "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+            },
+            {
+                "type": "spritesheet",
+                "key": "chicken_boss",
+                "url": "chicken.png",
+                "frameConfig": { "frameWidth": 95, "frameHeight": 89, "spacing": 1 }
             }
         ]
     }

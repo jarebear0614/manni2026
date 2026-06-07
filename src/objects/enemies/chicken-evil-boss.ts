@@ -32,26 +32,28 @@ export class ChickenEvilBoss extends GameObjects.Container
     private babyEvilChickenSpawner: EnemySpawnerComponent;
 
     private initialized: boolean = false;
+    private isMovementRunning: boolean = false;
 
     constructor(scene: BaseScene, x: number, y: number)
     {
         super(scene, x, y, []);
 
-        this.setSize(16, 16);
+        this.name = this.constructor.name;
+        this.setSize(95, 89);
 
         scene.add.existing(this);
         this.physicsGameObject = scene.physics.add.existing(this) as Types.Physics.Arcade.GameObjectWithDynamicBody;
 
-        this.mainSprite = scene.add.sprite(0, 0, 'chicken_evil');
+        this.mainSprite = scene.add.sprite(0, 0, 'chicken_boss');
+        this.mainSprite.setFlipX(true);
         this.add(this.mainSprite);
 
         this.explosionSprite = scene.add.sprite(0, 0, 'explosion_enemy', 0).setVisible(false);
-        this.explosionSprite.scale = 2/3;
         this.add(this.explosionSprite);
 
         Align.scaleContainerToGameWidth(this, 0.30, scene);
 
-        this.mainSprite.play('chicken_evil');
+        this.mainSprite.play('chicken_boss');
 
         scene.events.on(Scenes.Events.UPDATE, this.update, this);
         this.once(GameObjects.Events.DESTROY, () => { scene.events.off(Scenes.Events.UPDATE, this.update, this, false); }, this);
@@ -101,8 +103,11 @@ export class ChickenEvilBoss extends GameObjects.Container
         
         this.babyEvilChickenSpawner.update(timestamp, deltaTime);
 
-        this.verticalWavePatternInputComponent.update(timestamp, deltaTime);
-        this.verticalMovementComponent.update();
+        if(this.isMovementRunning)
+        {
+            this.verticalWavePatternInputComponent.update(timestamp, deltaTime);
+            this.verticalMovementComponent.update();
+        }
     }
 
     public getColliderComponent() 
@@ -128,6 +133,11 @@ export class ChickenEvilBoss extends GameObjects.Container
         this.healthComponent.reset();
         this.explosionSprite.setVisible(false);
         this.mainSprite.setVisible(true);
+    }
+
+    public startVerticalMovement()
+    {
+        this.isMovementRunning = true;
     }
     
     public getEnemyDeathConfig(): EnemyDeathConfig

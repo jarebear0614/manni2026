@@ -1,11 +1,12 @@
 import { Animations, GameObjects, Scenes, Types } from "phaser";
 import { BaseScene } from "../scenes/BaseScene";
 import { KeyboardInputComponent } from "../components/input/keyboard-input-component";
-import { PLAYER_BULLET_INTERVAL, PLAYER_BULLET_LIFESPAN, PLAYER_BULLET_MAX, PLAYER_BULLET_SCALE, PLAYER_BULLET_SPEED, PLAYER_HEALTH, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY } from "../config";
+import { DEFAULT_SPRITE_SCALE, PLAYER_BULLET_INTERVAL, PLAYER_BULLET_LIFESPAN, PLAYER_BULLET_MAX, PLAYER_BULLET_SCALE, PLAYER_BULLET_SPEED, PLAYER_HEALTH, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY } from "../config";
 import { VerticalMovementComponent } from "../components/input/movement/vertical-movement-component";
 import { WeaponComponent } from "../components/weapons/weapon-component";
 import { HealthComponent } from "../components/health/health-component";
 import { ColliderComponent } from "../components/collider/collider-component";
+import { Align } from "../util/align";
 
 export class Player extends GameObjects.Container
 {
@@ -46,6 +47,8 @@ export class Player extends GameObjects.Container
         this.explosionSprite.scale = 1/4;
         this.add(this.explosionSprite);
 
+        Align.scaleContainerToGameWidth(this, DEFAULT_SPRITE_SCALE, scene);
+
         this.keyboardInput = new KeyboardInputComponent(scene);
 
         this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.keyboardInput, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY);
@@ -66,6 +69,12 @@ export class Player extends GameObjects.Container
 
         this.healthComponent = new HealthComponent(PLAYER_HEALTH);
         this.colliderComponent = new ColliderComponent(this.healthComponent);
+
+        this.pause();
+        this.mainSprite.once(Animations.Events.ANIMATION_COMPLETE, () =>
+        {
+            this.unpause();
+        });
 
         this.explosionSprite.on(Animations.Events.ANIMATION_UPDATE, (animation: Animations.Animation, frame: Animations.AnimationFrame) =>
         {
@@ -123,6 +132,18 @@ export class Player extends GameObjects.Container
     public getHealthComponent()
     {
         return this.healthComponent;
+    }
+
+    public pause()
+    {
+        this.setActive(false);
+        this.keyboardInput.lock();
+    }
+
+    public unpause()
+    {
+        this.setActive(true);
+        this.keyboardInput.unlock();
     }
 
     private hide()
