@@ -16,6 +16,8 @@ export class GroupEnemyOrchestrator extends Events.EventEmitter
 
     private currentDestroyed: number = 0;
 
+    private paused: boolean = false;
+
     constructor(scene: BaseScene, eventBusComponent: EventBusComponent, spawners: (EnemySpawnerComponent[])[])
     {
         super();
@@ -28,15 +30,23 @@ export class GroupEnemyOrchestrator extends Events.EventEmitter
         this.scene.events.on(Scenes.Events.UPDATE, this.update, this);
         this.eventBusComponent.on(CUSTOM_EVENTS.ENEMY_DESTROYED, (enemy: any) =>
         {
+            if(enemy.name === 'BabyChickenEvil')
+            {
+                return;
+            }
+
             this.currentDestroyed++;
             if(this.currentDestroyed == this.getTotalEnemies())
             {
+                console.log(this.currentDestroyed, this.getTotalEnemies());
+                
                 const previous = this.enemySpawners[this.index];
                 this.index++;
                 const next = this.index >= this.enemySpawners.length ? null : this.enemySpawners[this.index];
 
                 this.currentDestroyed = 0;
 
+                console.log('emit wave change', next, previous);
                 this.emit(GroupEnemyOrchestrator.Events.WAVE_CHANGE, next, previous);
             }
         });
@@ -45,6 +55,16 @@ export class GroupEnemyOrchestrator extends Events.EventEmitter
     start()
     {
         this.emit(GroupEnemyOrchestrator.Events.WAVE_CHANGE, this.enemySpawners[0], null);
+    }
+
+    pause()
+    {
+        this.paused = true;
+    }
+
+    unpause()
+    {
+        this.paused = false;
     }
 
     getTotalEnemies()
@@ -68,6 +88,11 @@ export class GroupEnemyOrchestrator extends Events.EventEmitter
 
     update(timestamp: number, deltaTime: number)
     {
+        if(this.paused) 
+        {
+            return;
+        }
+
         if(this.enemySpawners.length == 0 || this.index >= this.enemySpawners.length)
         {
             return;

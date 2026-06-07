@@ -127,5 +127,24 @@
                 "url": "a.png"
             }
         ]
+    },
+    {
+        "path": "assets/hud",
+        "files": [
+            {
+                "type": "image",
+                "key": "HeartEmpty",
+                "url": "hud_heartEmpty.png"
+            },
+            {
+                "type": "image",
+                "key": "HeartFull",
+                "url": "hud_heartFull.png"
+            },
+            {
+                "type": "atlasXML",
+                "key": "hud"
+            }
+        ]
     }
 ]

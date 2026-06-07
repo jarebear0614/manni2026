@@ -5,7 +5,7 @@ import { Player } from '../objects/player';
 import { ChickenPink } from '../objects/enemies/chicken-pink';
 import { DEFAULT_SPRITE_SCALE, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START, ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_PINK_CHICKEN_GROUP_SPAWN_START } from '../config';
 import { ChickenGreen } from '../objects/enemies/chicken-green';
-import { BabyChickenEvil } from '../objects/enemies/baby_chicken_evil';
+import { BabyChickenEvil } from '../objects/enemies/baby-chicken-evil';
 import { ChickenEvil } from '../objects/enemies/chicken-evil';
 import { ColliderComponent } from '../components/collider/collider-component';
 import { EnemySpawnerComponent } from '../components/spawners/enemy-spawner-component';
@@ -13,6 +13,7 @@ import { CUSTOM_EVENTS, EventBusComponent } from '../components/events/event-bus
 import { EnemyDestroyedComponent } from '../components/spawners/enemy-destroyed-component';
 import { GroupEnemyOrchestrator } from '../components/spawners/group-enemy-orchestrator';
 import { ChickenEvilBoss } from '../objects/enemies/chicken-evil-boss';
+import { HealthComponent } from '../components/health/health-component';
 
 export class Game extends BaseScene
 {
@@ -36,6 +37,11 @@ export class Game extends BaseScene
     private downOnScreen: GameObjects.Image;
     private shootOnScreen: GameObjects.Image;
 
+    private enemiesDestroyed: number;
+    private livesLost: number;
+
+    private hearts: GameObjects.Sprite[] = [];
+
     constructor ()
     {
         super('Game');
@@ -56,8 +62,15 @@ export class Game extends BaseScene
 
         this.configureBackgrounds();
         this.configureOnscreenControls();
+        this.configureHUD();
 
-        const player = this.player = new Player(this, this.upOnScreen, this.downOnScreen, this.shootOnScreen);
+        const player = this.player = new Player(this, eventBusComponent, 
+            {
+                upOnScreen: this.upOnScreen,
+                downOnScreen: this.downOnScreen,
+                shootOnScreen: this.shootOnScreen
+            }
+        );
         this.wireEvents(eventBusComponent, player);        
     }
 
@@ -86,36 +99,36 @@ export class Game extends BaseScene
                     initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
-            ]
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenGreen, {
-            //         interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent)
-            // ],
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenEvil, {
-            //         interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent)
-            // ],
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenEvil, {
+                    interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent)
+            ],
         ]);
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);
@@ -209,10 +222,25 @@ export class Game extends BaseScene
                     }));
                 });
             }
-
             else {
                 this.spawnBoss();
             }
+        });
+
+        this.eventBusComponent.on(CUSTOM_EVENTS.ENEMY_DESTROYED, () => 
+        {
+            this.enemiesDestroyed++;
+        });
+
+        this.eventBusComponent.on(CUSTOM_EVENTS.PLAYER_DEAD, () =>
+        {
+            this.livesLost++;
+            this.orchestrator.pause();
+        });
+
+        this.eventBusComponent.on(CUSTOM_EVENTS.PLAYER_RESPAWNED, () =>
+        {
+            this.orchestrator.unpause();
         });
 
         this.orchestrator.start();
@@ -224,6 +252,18 @@ export class Game extends BaseScene
         this.bg3.tilePositionX += deltaTime * 0.020;
         this.bg4.tilePositionX += deltaTime * 0.030;
         this.bg5.tilePositionX += deltaTime * 0.040;
+
+        let healthComponent: HealthComponent = this.player.getHealthComponent();
+
+        for(let i = 0; i < healthComponent.getCurrent(); ++i)
+        {
+            this.hearts[i].setFrame('hud_heartFull.png');
+        }
+
+        for(let i = healthComponent.getCurrent(); i < healthComponent.getMax(); ++i)
+        {
+            this.hearts[i].setFrame('hud_heartEmpty.png');
+        }
     }
 
     private configureBackgrounds()
@@ -238,6 +278,24 @@ export class Game extends BaseScene
         this.bg3.setScale(this.getGameWidth() / this.bg3.displayWidth, this.getGameHeight() / this.bg3.displayHeight);
         this.bg4.setScale(this.getGameWidth() / this.bg4.displayWidth, this.getGameHeight() / this.bg4.displayHeight);
         this.bg5.setScale(this.getGameWidth() / this.bg5.displayWidth, this.getGameHeight() / this.bg5.displayHeight);
+    }
+
+    private configureHUD()
+    {
+        let x = this.getGameWidth() * 0.05;
+        let y = this.getGameHeight() * 0.05;
+        let heartOne = this.add.sprite(x, y, 'hud', 'hud_heartFull.png').setScrollFactor(0);
+        let heartTwo = this.add.sprite(x, y, 'hud', 'hud_heartFull.png').setScrollFactor(0);
+        let heartThree = this.add.sprite(x, y, 'hud', 'hud_heartFull.png').setScrollFactor(0);
+        let heartFour = this.add.sprite(x, y, 'hud', 'hud_heartFull.png').setScrollFactor(0);
+
+        Align.scaleObjectsToGameWidth([heartOne, heartTwo, heartThree, heartFour], 0.02, this);
+
+        heartTwo.setPosition(heartOne.x + heartOne.displayWidth, heartOne.y);
+        heartThree.setPosition(heartOne.x + heartOne.displayWidth * 2, heartOne.y);
+        heartFour.setPosition(heartOne.x + heartOne.displayWidth * 3, heartOne.y);
+
+        this.hearts.push(heartOne, heartTwo, heartThree, heartFour);
     }
 
     private spawnBoss()

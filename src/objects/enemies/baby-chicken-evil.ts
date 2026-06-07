@@ -30,6 +30,8 @@ export class BabyChickenEvil extends GameObjects.Container
     {
         super(scene, x, y, []);
 
+        this.name = this.constructor.name;
+
         this.setSize(16, 16);
 
         scene.add.existing(this);

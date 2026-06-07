@@ -9,7 +9,7 @@ import { Align } from "../../util/align";
 import { CUSTOM_EVENTS, EventBusComponent } from "../../components/events/event-bus-component";
 import { EnemyDeathConfig } from "../enemy-death-config";
 import { BabyChickenEvilSpawnerComponent } from "../../components/spawners/baby-chicken-evil-spawner-component";
-import { BabyChickenEvil } from "./baby_chicken_evil";
+import { BabyChickenEvil } from "./baby-chicken-evil";
 
 export class ChickenEvil extends GameObjects.Container
 {

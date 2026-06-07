@@ -7,6 +7,8 @@ import { WeaponComponent } from "../components/weapons/weapon-component";
 import { HealthComponent } from "../components/health/health-component";
 import { ColliderComponent } from "../components/collider/collider-component";
 import { Align } from "../util/align";
+import { CUSTOM_EVENTS, EventBusComponent } from "../components/events/event-bus-component";
+import { OnScreenControlsConfig } from "./on-screen-controls-config";
 
 export class Player extends GameObjects.Container
 {
@@ -23,11 +25,15 @@ export class Player extends GameObjects.Container
     private healthComponent: HealthComponent;
     private colliderComponent: ColliderComponent;
 
-    constructor(scene: BaseScene, upOnScreen: GameObjects.Image, downOnScreen: GameObjects.Image, shootOnScreen: GameObjects.Image)
+    private eventBusComponent: EventBusComponent;
+
+    constructor(scene: BaseScene, eventBusComponent: EventBusComponent, onScreenControlsConfig?: OnScreenControlsConfig)
     {
         super(scene, scene.getGameWidth() * 0.18, scene.getGameHeight() / 2 - 8, []);
 
         this.setSize(16, 16);
+
+        this.eventBusComponent = eventBusComponent;
 
         scene.add.existing(this);
         this.physicsGameObject = scene.physics.add.existing(this) as Types.Physics.Arcade.GameObjectWithDynamicBody;
@@ -37,19 +43,13 @@ export class Player extends GameObjects.Container
         this.mainSprite = scene.add.sprite(0, 0, 'player').setFlipX(true);
         this.add(this.mainSprite);
 
-        this.mainSprite.play('player_hatch');
-        this.mainSprite.once(Animations.Events.ANIMATION_COMPLETE, () =>
-        {
-            this.mainSprite.play('player_normal');
-        });
-
         this.explosionSprite = scene.add.sprite(0, 0, 'explosion', 0).setVisible(false);
         this.explosionSprite.scale = 1/4;
         this.add(this.explosionSprite);
 
         Align.scaleContainerToGameWidth(this, DEFAULT_SPRITE_SCALE, scene);
 
-        this.keyboardInput = new KeyboardInputComponent(scene, upOnScreen, downOnScreen, shootOnScreen);
+        this.keyboardInput = new KeyboardInputComponent(scene, onScreenControlsConfig);
 
         this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.keyboardInput, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY);
 
@@ -70,12 +70,6 @@ export class Player extends GameObjects.Container
         this.healthComponent = new HealthComponent(PLAYER_HEALTH);
         this.colliderComponent = new ColliderComponent(this.healthComponent);
 
-        this.pause();
-        this.mainSprite.once(Animations.Events.ANIMATION_COMPLETE, () =>
-        {
-            this.unpause();
-        });
-
         this.explosionSprite.on(Animations.Events.ANIMATION_UPDATE, (animation: Animations.Animation, frame: Animations.AnimationFrame) =>
         {
             if(frame.index == 4)
@@ -87,10 +81,13 @@ export class Player extends GameObjects.Container
         this.explosionSprite.on(Animations.Events.ANIMATION_COMPLETE, () =>
         {
             this.explosionSprite.setVisible(false);
+            this.spawn();
         });
 
         scene.events.on(Scenes.Events.UPDATE, this.update, this);
         this.once(GameObjects.Events.DESTROY, () => { scene.events.off(Scenes.Events.UPDATE, this.update, this, false); }, this);
+
+        this.spawn();
     }
 
     update(timestamp: any, deltaTime: number)
@@ -106,12 +103,33 @@ export class Player extends GameObjects.Container
             this.setVisible(true);
             this.explosionSprite.setVisible(true);
             this.explosionSprite.play('explosion_player');
+
+            this.eventBusComponent.emit(CUSTOM_EVENTS.PLAYER_DEAD, this);
             return;
         }
 
         this.keyboardInput.update();
         this.verticalMovementComponent.update();
         this.weaponComponent.update(deltaTime);        
+    }
+
+    private spawn()
+    {
+        this.setVisible(true);
+        this.explosionSprite.setVisible(false);
+        this.mainSprite.setVisible(true);
+
+        this.healthComponent.reset();
+
+        this.mainSprite.play('player_hatch');
+        this.pause();
+        this.mainSprite.once(Animations.Events.ANIMATION_COMPLETE, () =>
+        {
+            this.unpause();
+            this.mainSprite.play('player_normal');
+        });
+
+        this.eventBusComponent.emit(CUSTOM_EVENTS.PLAYER_RESPAWNED, this);
     }
 
     public getWeaponComponent() 

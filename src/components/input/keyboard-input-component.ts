@@ -1,29 +1,30 @@
 import { GameObjects, Types } from "phaser";
 import { InputComponent } from "./input-component";
 import { BaseScene } from "../../scenes/BaseScene";
+import { OnScreenControlsConfig } from "../../objects/on-screen-controls-config";
 
 export class KeyboardInputComponent extends InputComponent
 {
     private cursorKeys: Types.Input.Keyboard.CursorKeys;
     private inputLocked: boolean = false;
 
-    private upOnScreen: GameObjects.Image;
-    private downOnScreen: GameObjects.Image;
-    private shootOnScreen: GameObjects.Image;
+    private upOnScreen?: GameObjects.Image;
+    private downOnScreen?: GameObjects.Image;
+    private shootOnScreen?: GameObjects.Image;
 
     private onScreenUp: boolean = false;
     private onScreenDown: boolean = false;
     private onScreenShoot: boolean = false;
 
-    constructor(scene: BaseScene, upOnScreen: GameObjects.Image, downOnScreen: GameObjects.Image, shootOnScreen: GameObjects.Image)
+    constructor(scene: BaseScene, onScreenControlsConfig?: OnScreenControlsConfig)
     {
         super();
 
-        this.upOnScreen = upOnScreen;
-        this.downOnScreen = downOnScreen;
-        this.shootOnScreen = shootOnScreen;
+        this.upOnScreen = onScreenControlsConfig?.upOnScreen;
+        this.downOnScreen = onScreenControlsConfig?.downOnScreen;
+        this.shootOnScreen = onScreenControlsConfig?.shootOnScreen;
 
-        this.upOnScreen.on('pointerup', () => 
+        this.upOnScreen?.on('pointerup', () => 
         {
             if(this.inputLocked)
             {
@@ -34,7 +35,7 @@ export class KeyboardInputComponent extends InputComponent
             this.onScreenUp = false;
         });
 
-        this.upOnScreen.on('pointerdown', () => 
+        this.upOnScreen?.on('pointerdown', () => 
         {
             if(this.inputLocked)
             {
@@ -45,7 +46,7 @@ export class KeyboardInputComponent extends InputComponent
             this.onScreenUp = true;
         });
 
-        this.downOnScreen.on('pointerup', () => 
+        this.downOnScreen?.on('pointerup', () => 
         {
             if(this.inputLocked)
             {
@@ -54,7 +55,7 @@ export class KeyboardInputComponent extends InputComponent
             this.onScreenDown = false;
         });
 
-        this.downOnScreen.on('pointerdown', () => 
+        this.downOnScreen?.on('pointerdown', () => 
         {
             if(this.inputLocked)
             {
@@ -63,7 +64,7 @@ export class KeyboardInputComponent extends InputComponent
             this.onScreenDown = true;
         });
 
-        this.shootOnScreen.on('pointerup', () => 
+        this.shootOnScreen?.on('pointerup', () => 
         {
             if(this.inputLocked)
             {
@@ -72,7 +73,7 @@ export class KeyboardInputComponent extends InputComponent
             this.onScreenShoot = false;
         });
 
-        this.shootOnScreen.on('pointerdown', () => 
+        this.shootOnScreen?.on('pointerdown', () => 
         {
             if(this.inputLocked)
             {

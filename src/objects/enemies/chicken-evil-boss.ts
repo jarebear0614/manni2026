@@ -7,7 +7,7 @@ import { ColliderComponent } from "../../components/collider/collider-component"
 import { Align } from "../../util/align";
 import { CUSTOM_EVENTS, EventBusComponent } from "../../components/events/event-bus-component";
 import { EnemyDeathConfig } from "../enemy-death-config";
-import { BabyChickenEvil } from "./baby_chicken_evil";
+import { BabyChickenEvil } from "./baby-chicken-evil";
 import { EnemySpawnerComponent } from "../../components/spawners/enemy-spawner-component";
 import { VerticalWavePatternInputComponent } from "../../components/input/vertical-wave-pattern-input-component";
 import { VerticalMovementComponent } from "../../components/input/movement/vertical-movement-component";
