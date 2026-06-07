@@ -38,7 +38,7 @@ export class ChickenEvilBoss extends GameObjects.Container
     {
         super(scene, x, y, []);
 
-        this.name = this.constructor.name;
+        this.name = "ChickenEvilBoss";
         this.setSize(95, 89);
 
         scene.add.existing(this);
