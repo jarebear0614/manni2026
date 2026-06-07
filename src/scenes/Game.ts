@@ -91,7 +91,6 @@ export class Game extends BaseScene
         this.configureOnscreenControls();
         this.configureHUD();
         this.createFont();
-        this.createEndTextObjects();
 
         const player = this.player = new Player(this, eventBusComponent, 
             {
@@ -566,14 +565,8 @@ export class Game extends BaseScene
                 families: [ 'quartz' ]
             },
             active: () =>
-            {
-                // this.add.text(this.holdTopLeft.x, this.holdTopLeft.y, 'Click here \nto hold piece', { fontFamily: 'quartz', fontSize: 16, color: '#ffffff' })
-                // this.add.text(this.nextTopLeft.x, this.nextTopLeft.y, 'next', { fontFamily: 'quartz', fontSize: 16, color: '#ffffff' })
-
-                // for(let f of this.textActiveFunctions)
-                // {
-                //     f();
-                // }
+            {                
+                this.createEndTextObjects();
             }
         });
     }
