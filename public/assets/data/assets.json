@@ -107,5 +107,25 @@
                 "frameConfig": { "frameWidth": 95, "frameHeight": 89, "spacing": 1 }
             }
         ]
+    },
+    {
+        "path": "assets/controls",
+        "files": [
+            {
+                "type": "image",
+                "key": "up",
+                "url": "up.png"
+            },
+            {
+                "type": "image",
+                "key": "down",
+                "url": "down.png"
+            },
+            {
+                "type": "image",
+                "key": "abutton",
+                "url": "a.png"
+            }
+        ]
     }
 ]

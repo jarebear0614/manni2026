@@ -32,6 +32,10 @@ export class Game extends BaseScene
     bg4: GameObjects.TileSprite;
     bg5: GameObjects.TileSprite;
 
+    private upOnScreen: GameObjects.Image;
+    private downOnScreen: GameObjects.Image;
+    private shootOnScreen: GameObjects.Image;
+
     constructor ()
     {
         super('Game');
@@ -50,10 +54,27 @@ export class Game extends BaseScene
 
         const eventBusComponent: EventBusComponent = this.eventBusComponent = new EventBusComponent();
 
-        this.configureBackgrounds();       
+        this.configureBackgrounds();
+        this.configureOnscreenControls();
 
-        const player = this.player = new Player(this);
+        const player = this.player = new Player(this, this.upOnScreen, this.downOnScreen, this.shootOnScreen);
         this.wireEvents(eventBusComponent, player);        
+    }
+
+    private configureOnscreenControls() 
+    {
+        let directionsTopLeft = {x: this.getGameWidth() * .08, y: this.getGameHeight() * .75};
+        this.upOnScreen = this.add.image(0, 0, 'up').setInteractive({useHandCursor: true}).setScrollFactor(0);
+        this.downOnScreen = this.add.image(0, 0, 'down').setInteractive({useHandCursor: true}).setScrollFactor(0);
+        
+        this.shootOnScreen = this.add.image(this.getGameWidth() * 0.92, this.getGameHeight() * 0.88, 'abutton').setInteractive({useHandCursor: true}).setScrollFactor(0);
+
+        Align.scaleToGameWidth(this.upOnScreen, 0.06, this);
+        Align.scaleToGameWidth(this.downOnScreen, 0.06, this);
+        Align.scaleToGameWidth(this.shootOnScreen, 0.06, this);
+
+        this.upOnScreen.setPosition(directionsTopLeft.x, directionsTopLeft.y);
+        this.downOnScreen.setPosition(directionsTopLeft.x, directionsTopLeft.y + this.upOnScreen.displayHeight + 10);
     }
 
     private wireEvents(eventBusComponent: EventBusComponent, player: Player) 

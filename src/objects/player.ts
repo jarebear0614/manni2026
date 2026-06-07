@@ -23,7 +23,7 @@ export class Player extends GameObjects.Container
     private healthComponent: HealthComponent;
     private colliderComponent: ColliderComponent;
 
-    constructor(scene: BaseScene)
+    constructor(scene: BaseScene, upOnScreen: GameObjects.Image, downOnScreen: GameObjects.Image, shootOnScreen: GameObjects.Image)
     {
         super(scene, scene.getGameWidth() * 0.10, scene.getGameHeight() / 2 - 8, []);
 
@@ -49,7 +49,7 @@ export class Player extends GameObjects.Container
 
         Align.scaleContainerToGameWidth(this, DEFAULT_SPRITE_SCALE, scene);
 
-        this.keyboardInput = new KeyboardInputComponent(scene);
+        this.keyboardInput = new KeyboardInputComponent(scene, upOnScreen, downOnScreen, shootOnScreen);
 
         this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.keyboardInput, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY);
 
