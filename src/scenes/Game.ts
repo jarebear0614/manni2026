@@ -43,6 +43,10 @@ export class Game extends BaseScene
 
     private hearts: GameObjects.Sprite[] = [];
 
+    private slowScrollTime: number = 2000;
+    private currentSlow: number = this.slowScrollTime;
+    private endTriggered: boolean = false;
+
     private fadeOutRect: GameObjects.Rectangle;
     
     private endTextEnemiesDestroyedCategory: GameObjects.Text;
@@ -103,8 +107,43 @@ export class Game extends BaseScene
             .setScrollFactor(0, 0)
             .setOrigin(0, 0)
             .setAlpha(0)
-            .setDepth(3);
+            .setDepth(3);    
+            
+        
+        console.log(this.sound.get('theme'));
 
+
+        let theme = this.sound.add('theme');
+        theme.addMarker(
+            {
+                name: 'theme_first',
+                start: 0,
+                duration: 78,
+                config: {
+                    loop: true
+                }
+            });
+
+        theme.addMarker(
+            {
+                name: 'theme_loop',
+                start: 2.4,
+                duration: 78,
+                config: {
+                    loop: true
+                }
+            });
+
+        theme.play('theme_first',
+            {
+                loop: false,
+                volume: 0.5
+            }
+        );
+
+        theme.on('complete', () => {
+            theme.play('theme_loop', { loop: true, volume: 0.5 });
+        })
     }
 
     private configureOnscreenControls() 
@@ -131,36 +170,36 @@ export class Game extends BaseScene
                     initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
-            ],
-            [
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 2
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenGreen, {
-                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent)
-            ],
-            [
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenEvil, {
-                    interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 2
-                }, eventBusComponent)
-            ],
+            ]
+            // [
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 2
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenGreen, {
+            //         interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent)
+            // ],
+            // [
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenPink, {
+            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 1
+            //     }, eventBusComponent),
+            //     new EnemySpawnerComponent(this, ChickenEvil, {
+            //         interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
+            //         initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
+            //         maxCount: 2
+            //     }, eventBusComponent)
+            // ],
         ]);
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);
@@ -279,10 +318,19 @@ export class Game extends BaseScene
 
     update(timestamp: number, deltaTime: number)
     {
-        this.bg2.tilePositionX += deltaTime * 0.010;
-        this.bg3.tilePositionX += deltaTime * 0.020;
-        this.bg4.tilePositionX += deltaTime * 0.030;
-        this.bg5.tilePositionX += deltaTime * 0.040;
+        if(this.endTriggered)
+        {
+            this.currentSlow -= deltaTime;
+            if(this.currentSlow <= 0)
+            {
+                this.currentSlow = 0;
+            }
+        }
+
+        this.bg2.tilePositionX += (deltaTime * 0.010) * (this.currentSlow / this.slowScrollTime);
+        this.bg3.tilePositionX += (deltaTime * 0.020) * (this.currentSlow / this.slowScrollTime);
+        this.bg4.tilePositionX += (deltaTime * 0.030) * (this.currentSlow / this.slowScrollTime);
+        this.bg5.tilePositionX += (deltaTime * 0.040) * (this.currentSlow / this.slowScrollTime);
 
         let healthComponent: HealthComponent = this.player.getHealthComponent();
 
@@ -405,6 +453,15 @@ export class Game extends BaseScene
     private triggerEndScreen()
     {
         this.player.pause();
+
+        this.endTriggered = true;        
+
+        this.sound.stopAll();
+        this.sound.play('ending', 
+        {
+            volume: 0.5,
+            loop: true
+        });
 
         const enemiesDestroyedScore = this.enemiesDestroyed * ENEMY_DESTROYED_SCORE;
         const livesLostScore = this.livesLost * LIVES_LOST_SCORE;

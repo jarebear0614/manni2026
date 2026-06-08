@@ -29,6 +29,7 @@ export class EnemyDestroyedComponent
             }
 
             deathConfig.explosionSprite.play(deathConfig.deathAnimationAssetKey);
+            this.scene.sound.play('small-explosion', { loop: false, volume: 0.1 });
 
             deathConfig.explosionSprite.setVisible(true);
 

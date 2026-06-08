@@ -103,6 +103,7 @@ export class Player extends GameObjects.Container
             this.setVisible(true);
             this.explosionSprite.setVisible(true);
             this.explosionSprite.play('explosion_player');
+            this.scene.sound.play('large-explosion', { loop: false, volume: 0.5 });
 
             this.eventBusComponent.emit(CUSTOM_EVENTS.PLAYER_DEAD, this);
             return;

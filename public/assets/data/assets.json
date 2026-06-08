@@ -146,5 +146,35 @@
                 "key": "hud"
             }
         ]
+    },
+    {
+        "path": "assets/music",
+        "files": [
+            {
+                "type": "audio",
+                "key": "ending",
+                "url": "ending.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "theme",
+                "url": "theme.mp3"
+            }
+        ]
+    },
+    {
+        "path": "assets/sounds",
+        "files": [
+            {
+                "type": "audio",
+                "key": "large-explosion",
+                "url": "large-explosion.wav"
+            },
+            {
+                "type": "audio",
+                "key": "small-explosion",
+                "url": "small-explosion.wav"
+            }
+        ]
     }
 ]

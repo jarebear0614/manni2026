@@ -32,6 +32,13 @@ export class ChickenEvilBoss extends GameObjects.Container
     private isMovementRunning: boolean = false;
     private tinting: boolean = false;
 
+    private explosions = 50;
+    private explosionsSpawned = 0;
+    private timeBetweenExplosions = 50;
+    private currentExplosionTime = this.timeBetweenExplosions;
+    private dying: boolean = false;
+    private explosionGroup: GameObjects.Group;
+
     constructor(scene: BaseScene, x: number, y: number)
     {
         super(scene, x, y, []);
@@ -48,6 +55,10 @@ export class ChickenEvilBoss extends GameObjects.Container
 
         this.explosionSprite = scene.add.sprite(0, 0, 'explosion_enemy', 0).setVisible(false);
         this.add(this.explosionSprite);
+
+        this.explosionGroup = this.scene.add.group({
+            name: `${this.constructor.name}-${Phaser.Math.RND.uuid()}`
+        });
 
         Align.scaleContainerToGameWidth(this, 0.30, scene);
 
@@ -110,13 +121,48 @@ export class ChickenEvilBoss extends GameObjects.Container
         {
             return;
         }
+
+        if(this.dying)
+        {
+            if(this.explosionsSpawned < this.explosions)
+            {
+                this.currentExplosionTime -= deltaTime;
+                if(this.currentExplosionTime <= 0)
+                {
+                    this.explosionsSpawned++;
+                    this.currentExplosionTime = this.timeBetweenExplosions;
+
+                    let x = Phaser.Math.RND.between(this.x - this.displayWidth / 2, this.x + this.displayWidth / 2);
+                    let y = Phaser.Math.RND.between(this.y - this.displayHeight / 2, this.y + this.displayWidth / 2);
+                    let sprite = this.explosionGroup.get(x, y);
+                    
+                    sprite.play('explosion_enemy');
+                    this.scene.sound.play('small-explosion', { volume: 0.1, loop: false });
+                }
+            }
+            else
+            {
+                this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_DESTROYED, this);
+                this.hide();
+            }
+
+            return;
+        }
         
         if(this.healthComponent.isDead())
         {
-            this.hide();
             this.setVisible(true);
 
-            this.eventBusComponent.emit(CUSTOM_EVENTS.ENEMY_DESTROYED, this);
+            this.dying = true;
+
+            this.scene.tweens.add({
+                    targets: this.mainSprite,
+                    alpha: { from: 1.0, to: 0 },
+                    ease: 'Linear',
+                    duration: this.explosions * this.timeBetweenExplosions,
+                    repeat: 0,
+                    yoyo: false
+            });
             return;
         }
         
