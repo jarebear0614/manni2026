@@ -140,7 +140,6 @@ export class ChickenEvilBoss extends GameObjects.Container
                     this.scene.sound.play('small-explosion', { volume: 0.5, loop: false });
                 }
             }
-
                     
             if(this.explosionsSpawned < this.explosions)
             {
@@ -183,7 +182,7 @@ export class ChickenEvilBoss extends GameObjects.Container
             });
 
             this.scene.tweens.add({
-                    targets: this.mainSprite,
+                    targets: this,
                     y: { from: this.y, to: this.y + 300 },
                     ease: 'Linear',
                     duration: this.explosions * this.timeBetweenExplosions,
