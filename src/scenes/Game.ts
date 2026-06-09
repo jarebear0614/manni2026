@@ -256,6 +256,7 @@ export class Game extends BaseScene
                     }
 
                     player.getColliderComponent().collideWithEnemyEgg();
+                    this.sound.play('hit', { volume: 0.3 });
 
                     if (enemy.getWeaponComponent && typeof (enemy.getWeaponComponent) === 'function') {
                         enemy.getWeaponComponent().destroyBullet(enemyBullet);
@@ -291,6 +292,7 @@ export class Game extends BaseScene
                 if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                     const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                     colliderComponent.collideWithEnemyEgg();
+                    this.sound.play('hit', { volume: 0.3 });
                 }
 
                 player.getWeaponComponent().destroyBullet(playerBullet);
@@ -333,6 +335,7 @@ export class Game extends BaseScene
                         if (enemyGeneric.getColliderComponent && typeof (enemyGeneric.getColliderComponent) === 'function') {
                             const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                             colliderComponent.collideWithEnemyEgg();
+                            this.sound.play('hit', { volume: 0.3 });
                         }
 
                         player.getWeaponComponent().destroyBullet(playerBullet);
@@ -479,6 +482,7 @@ export class Game extends BaseScene
         {
             if(enemy.name === "ChickenEvilBoss")
             {
+                this.overlaps.forEach((o) => { o.destroy(); });
                 this.triggerEndScreen();
             }
         }, this);
@@ -546,6 +550,7 @@ export class Game extends BaseScene
                     {
                         const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                         colliderComponent.collideWithEnemyEgg();
+                        this.sound.play('hit', { volume: 0.3 });
                     }
 
                     this.player.getWeaponComponent().destroyBullet(playerBullet);

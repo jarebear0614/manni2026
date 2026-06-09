@@ -184,6 +184,16 @@
                 "type": "audio",
                 "key": "rumble",
                 "url": "rumble.wav"
+            },
+            {
+                "type": "audio",
+                "key": "hit",
+                "url": "hit.wav"
+            },
+            {
+                "type": "audio",
+                "key": "shoot",
+                "url": "shoot.mp3"
             }
         ]
     }

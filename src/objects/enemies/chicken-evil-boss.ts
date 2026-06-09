@@ -137,7 +137,7 @@ export class ChickenEvilBoss extends GameObjects.Container
                     this.soundsSpawned++;
 
                     this.currentExplosionSoundTime = this.timeBetweenSounds;
-                    this.scene.sound.play('small-explosion', { volume: 0.1, loop: false });
+                    this.scene.sound.play('small-explosion', { volume: 0.5, loop: false });
                 }
             }
 
@@ -169,6 +169,7 @@ export class ChickenEvilBoss extends GameObjects.Container
         if(this.healthComponent.isDead())
         {
             this.setVisible(true);
+            //this.setActive(false);
 
             this.dying = true;
 

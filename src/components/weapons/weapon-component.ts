@@ -58,6 +58,8 @@ export class WeaponComponent
             const x = this.gameObject.x + this.bulletConfig.xOffset;
             const y = this.gameObject.y + this.bulletConfig.yOffset;
 
+            this.gameObject.scene.sound.play('shoot', { volume: 0.7 });
+
             bullet.enableBody(true, x, y, true, true);
             bullet.play('bullet');
             bullet.body.velocity.x = this.bulletConfig.speed;
