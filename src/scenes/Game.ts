@@ -66,6 +66,8 @@ export class Game extends BaseScene
 
     private underline: GameObjects.Line;
 
+    private theme: Phaser.Sound.NoAudioSound | Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound;
+
     constructor ()
     {
         super('Game');
@@ -113,8 +115,8 @@ export class Game extends BaseScene
         console.log(this.sound.get('theme'));
 
 
-        let theme = this.sound.add('theme');
-        theme.addMarker(
+        this.theme = this.sound.add('theme');
+        this.theme.addMarker(
             {
                 name: 'theme_first',
                 start: 0,
@@ -124,7 +126,7 @@ export class Game extends BaseScene
                 }
             });
 
-        theme.addMarker(
+        this.theme.addMarker(
             {
                 name: 'theme_loop',
                 start: 2.4,
@@ -134,15 +136,15 @@ export class Game extends BaseScene
                 }
             });
 
-        theme.play('theme_first',
+        this.theme.play('theme_first',
             {
                 loop: false,
                 volume: 0.5
             }
         );
 
-        theme.on('complete', () => {
-            theme.play('theme_loop', { loop: true, volume: 0.5 });
+        this.theme.on('complete', () => {
+            this.theme.play('theme_loop', { loop: true, volume: 0.5 });
         })
     }
 
@@ -382,6 +384,52 @@ export class Game extends BaseScene
         this.boss = new ChickenEvilBoss(this, this.getGameWidth() + 300, this.getGameHeight() / 2);
         this.boss.init(this.eventBusComponent);
 
+        let themeTween = this.tweens.add({
+            targets: this.theme,
+            volume: { from: 1.0, to: 0 },
+            ease: 'Linear',
+            duration: 2000,
+            repeat: 0,
+            yoyo: false
+        });
+
+        themeTween.onCompleteHandler = () =>
+        {
+            this.tweens.killTweensOf(this.theme);
+            this.theme.stop();
+        }
+
+        let bossMusic = this.sound.add('boss');
+        bossMusic.addMarker(
+        {
+            name: 'boss_first',
+            start: 0,
+            config: {
+                loop: true
+            }
+        });
+
+        bossMusic.addMarker(
+            {
+                name: 'boss_loop',
+                start: 9.4,
+                duration: 78,
+                config: {
+                    loop: true
+                }
+            });
+
+        bossMusic.play('boss_first',
+            {
+                loop: false,
+                volume: 0.5
+            }
+        );
+
+        bossMusic.on('complete', () => {
+            bossMusic.play('boss_loop', { loop: true, volume: 0.5 });
+        })
+
         this.player.pause();
 
         this.orchestrator.removeAllListeners();
@@ -392,6 +440,8 @@ export class Game extends BaseScene
                 this.triggerEndScreen();
             }
         }, this);
+
+        this.sound.play('rumble');
 
         let t = this.tweens.add({
             targets: this.boss,
@@ -404,10 +454,22 @@ export class Game extends BaseScene
 
         this.cameras.main.shake(12000, 0.005, true);
         t.onCompleteHandler = () =>
-        {
+        {            
+            let rumble = this.sound.get('rumble');
+            this.tweens.add({
+                targets: rumble,
+                volume: { from: 1.0, to: 0 },
+                ease: 'Linear',
+                duration: 2000,
+                repeat: 0,
+                yoyo: false
+            });
+
             this.tweens.killTweensOf(this.boss!);
             this.time.delayedCall(2000, () =>
             {
+                this.sound.stopByKey('rumble');
+
                 this.player.unpause();
                 this.boss!.startVerticalMovement();                
 

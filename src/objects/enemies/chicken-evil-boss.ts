@@ -38,6 +38,11 @@ export class ChickenEvilBoss extends GameObjects.Container
     private currentExplosionTime = this.timeBetweenExplosions;
     private dying: boolean = false;
     private explosionGroup: GameObjects.Group;
+    
+    private numberOfSounds = 5;
+    private soundsSpawned = 0;
+    private timeBetweenSounds = 440;
+    private currentExplosionSoundTime = 0;
 
     constructor(scene: BaseScene, x: number, y: number)
     {
@@ -124,6 +129,19 @@ export class ChickenEvilBoss extends GameObjects.Container
 
         if(this.dying)
         {
+            if(this.soundsSpawned < this.numberOfSounds)
+            {
+                this.currentExplosionSoundTime -= deltaTime;
+                if(this.currentExplosionSoundTime <= 0)
+                {
+                    this.soundsSpawned++;
+
+                    this.currentExplosionSoundTime = this.timeBetweenSounds;
+                    this.scene.sound.play('small-explosion', { volume: 0.1, loop: false });
+                }
+            }
+
+                    
             if(this.explosionsSpawned < this.explosions)
             {
                 this.currentExplosionTime -= deltaTime;
@@ -137,7 +155,6 @@ export class ChickenEvilBoss extends GameObjects.Container
                     let sprite = this.explosionGroup.get(x, y);
                     
                     sprite.play('explosion_enemy');
-                    this.scene.sound.play('small-explosion', { volume: 0.1, loop: false });
                 }
             }
             else
@@ -158,6 +175,15 @@ export class ChickenEvilBoss extends GameObjects.Container
             this.scene.tweens.add({
                     targets: this.mainSprite,
                     alpha: { from: 1.0, to: 0 },
+                    ease: 'Linear',
+                    duration: this.explosions * this.timeBetweenExplosions,
+                    repeat: 0,
+                    yoyo: false
+            });
+
+            this.scene.tweens.add({
+                    targets: this.mainSprite,
+                    y: { from: this.y, to: this.y + 300 },
                     ease: 'Linear',
                     duration: this.explosions * this.timeBetweenExplosions,
                     repeat: 0,

@@ -159,6 +159,11 @@
                 "type": "audio",
                 "key": "theme",
                 "url": "theme.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "boss",
+                "url": "boss.mp3"
             }
         ]
     },
@@ -174,6 +179,11 @@
                 "type": "audio",
                 "key": "small-explosion",
                 "url": "small-explosion.wav"
+            },
+            {
+                "type": "audio",
+                "key": "rumble",
+                "url": "rumble.wav"
             }
         ]
     }
