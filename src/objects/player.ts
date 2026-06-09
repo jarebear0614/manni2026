@@ -29,7 +29,7 @@ export class Player extends GameObjects.Container
 
     constructor(scene: BaseScene, eventBusComponent: EventBusComponent, onScreenControlsConfig?: OnScreenControlsConfig)
     {
-        super(scene, scene.getGameWidth() * 0.18, scene.getGameHeight() / 2 - 8, []);
+        super(scene, scene.getGameWidth() * 0.25, scene.getGameHeight() / 2 - 8, []);
 
         this.setSize(16, 16);
 

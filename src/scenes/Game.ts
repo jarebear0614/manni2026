@@ -172,14 +172,14 @@ export class Game extends BaseScene
 
     private configureOnscreenControls() 
     {
-        let directionsTopLeft = {x: this.getGameWidth() * .08, y: this.getGameHeight() * .75};
+        let directionsTopLeft = {x: this.getGameWidth() * .10, y: this.getGameHeight() * .60};
         this.upOnScreen = this.add.image(0, 0, 'up').setInteractive({useHandCursor: true}).setScrollFactor(0);
         this.downOnScreen = this.add.image(0, 0, 'down').setInteractive({useHandCursor: true}).setScrollFactor(0);
-        this.shootOnScreen = this.add.image(this.getGameWidth() * 0.92, this.getGameHeight() * 0.88, 'abutton').setInteractive({useHandCursor: true}).setScrollFactor(0);
+        this.shootOnScreen = this.add.image(this.getGameWidth() * 0.88, this.getGameHeight() * 0.80, 'abutton').setInteractive({useHandCursor: true}).setScrollFactor(0);
 
-        Align.scaleToGameWidth(this.upOnScreen, 0.06, this);
-        Align.scaleToGameWidth(this.downOnScreen, 0.06, this);
-        Align.scaleToGameWidth(this.shootOnScreen, 0.06, this);
+        Align.scaleToGameWidth(this.upOnScreen, 0.11, this);
+        Align.scaleToGameWidth(this.downOnScreen, 0.11, this);
+        Align.scaleToGameWidth(this.shootOnScreen, 0.11, this);
 
         this.upOnScreen.setPosition(directionsTopLeft.x, directionsTopLeft.y);
         this.downOnScreen.setPosition(directionsTopLeft.x, directionsTopLeft.y + this.upOnScreen.displayHeight + 10);
@@ -241,6 +241,23 @@ export class Game extends BaseScene
                     interval: 3000,
                     initialSpawnTime: 0,
                     maxCount: 2
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: 2500,
+                    initialSpawnTime: 0,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: 3000,
+                    initialSpawnTime: 0,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
                 }, eventBusComponent)
             ],
         ]);
