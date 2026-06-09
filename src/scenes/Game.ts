@@ -3,9 +3,8 @@ import { BaseScene } from './BaseScene';
 import { Align } from '../util/align';
 import { Player } from '../objects/player';
 import { ChickenPink } from '../objects/enemies/chicken-pink';
-import { BOSS_DESTROYED_SCORE, DEFAULT_SPRITE_SCALE, ENEMY_DESTROYED_SCORE, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START, ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_PINK_CHICKEN_GROUP_SPAWN_START, LIVES_LOST_SCORE } from '../config';
+import { BOSS_DESTROYED_SCORE, ENEMY_DESTROYED_SCORE, ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START, ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL, ENEMY_PINK_CHICKEN_GROUP_SPAWN_START, LIVES_LOST_SCORE } from '../config';
 import { ChickenGreen } from '../objects/enemies/chicken-green';
-import { BabyChickenEvil } from '../objects/enemies/baby-chicken-evil';
 import { ChickenEvil } from '../objects/enemies/chicken-evil';
 import { ColliderComponent } from '../components/collider/collider-component';
 import { EnemySpawnerComponent } from '../components/spawners/enemy-spawner-component';
@@ -245,19 +244,19 @@ export class Game extends BaseScene
             ],
             [
                 new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: 2500,
+                    interval: 1500,
                     initialSpawnTime: 0,
                     maxCount: 2
                 }, eventBusComponent),
                 new EnemySpawnerComponent(this, ChickenPink, {
-                    interval: 3000,
+                    interval: 1000,
                     initialSpawnTime: 0,
                     maxCount: 2
                 }, eventBusComponent),
                 new EnemySpawnerComponent(this, ChickenGreen, {
                     interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-                    maxCount: 1
+                    initialSpawnTime: 0,
+                    maxCount: 2
                 }, eventBusComponent)
             ],
         ]);
