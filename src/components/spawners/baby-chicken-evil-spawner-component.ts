@@ -12,6 +12,8 @@ export class BabyChickenEvilSpawnerComponent
         this.scene = scene;
         this.group = this.scene.add.group({
             name: `${this.constructor.name}-baby-evil-${Phaser.Math.RND.uuid()}`,
+            max: 0,
+            maxSize: -1,
             classType: enemyClass,
             runChildUpdate: true,
             createCallback: (enemy: any) =>
@@ -42,13 +44,12 @@ export class BabyChickenEvilSpawnerComponent
     spawn(x: number, y: number)
     {
         const enemy1: any = this.group.get(x, y - 24);
-        const enemy2: any = this.group.get(x, y + 24);
-
         if(enemy1.reset && typeof(enemy1.reset) === 'function')
         {
             enemy1.reset();
         }
 
+        const enemy2: any = this.group.get(x, y + 24);
         if(enemy2.reset && typeof(enemy2.reset) === 'function')
         {
             enemy2.reset();

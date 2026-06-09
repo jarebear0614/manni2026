@@ -1,7 +1,7 @@
 import { Animations, GameObjects, Scenes, Types } from "phaser";
 import { BaseScene } from "../scenes/BaseScene";
 import { KeyboardInputComponent } from "../components/input/keyboard-input-component";
-import { DEFAULT_SPRITE_SCALE, PLAYER_BULLET_INTERVAL, PLAYER_BULLET_LIFESPAN, PLAYER_BULLET_MAX, PLAYER_BULLET_SCALE, PLAYER_BULLET_SPEED, PLAYER_HEALTH, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY } from "../config";
+import { DEFAULT_SPRITE_SCALE, PLAYER_BULLET_INTERVAL, PLAYER_BULLET_LIFESPAN, PLAYER_BULLET_MAX, PLAYER_BULLET_SCALE, PLAYER_BULLET_SPEED, PLAYER_HEALTH, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY, PLAYER_MOVEMENT_VERTICAL_VELOCITY } from "../config";
 import { VerticalMovementComponent } from "../components/input/movement/vertical-movement-component";
 import { WeaponComponent } from "../components/weapons/weapon-component";
 import { HealthComponent } from "../components/health/health-component";
@@ -51,7 +51,7 @@ export class Player extends GameObjects.Container
 
         this.keyboardInput = new KeyboardInputComponent(scene, onScreenControlsConfig);
 
-        this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.keyboardInput, PLAYER_MOVEMENT_HORIZONTAL_VELOCITY);
+        this.verticalMovementComponent = new VerticalMovementComponent(this as Types.Physics.Arcade.GameObjectWithDynamicBody, this.keyboardInput, PLAYER_MOVEMENT_VERTICAL_VELOCITY);
 
         this.weaponComponent = new WeaponComponent(
             this, 

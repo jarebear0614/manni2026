@@ -15,6 +15,29 @@ import { GroupEnemyOrchestrator } from '../components/spawners/group-enemy-orche
 import { ChickenEvilBoss } from '../objects/enemies/chicken-evil-boss';
 import { HealthComponent } from '../components/health/health-component';
 import WebFont from 'webfontloader';
+import { TextUtility } from '../util/text';
+
+export class TextTweenDisplayConfig
+{
+    text: any[];
+    tweenConfig: Types.Tweens.TweenBuilderConfig;
+
+    constructor(text: any[], tweenConfig: Types.Tweens.TweenBuilderConfig)
+    {
+        this.text = text;
+        this.tweenConfig = tweenConfig;
+    }
+}
+
+export class TextTweenDisplay
+{
+    config: TextTweenDisplayConfig[];
+
+    constructor(config: TextTweenDisplayConfig[])
+    {
+        this.config = config;
+    }
+}
 
 export class Game extends BaseScene
 {
@@ -68,6 +91,9 @@ export class Game extends BaseScene
 
     private theme: Phaser.Sound.NoAudioSound | Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound;
 
+    private scoreTweenDisplay: TextTweenDisplay;
+    private poemTweenDisplay: TextTweenDisplay;
+
     constructor ()
     {
         super('Game');
@@ -109,11 +135,7 @@ export class Game extends BaseScene
             .setScrollFactor(0, 0)
             .setOrigin(0, 0)
             .setAlpha(0)
-            .setDepth(3);    
-            
-        
-        console.log(this.sound.get('theme'));
-
+            .setDepth(3);
 
         this.theme = this.sound.add('theme');
         this.theme.addMarker(
@@ -172,36 +194,55 @@ export class Game extends BaseScene
                     initialSpawnTime: 2000,
                     maxCount: 1
                 }, eventBusComponent)
-            ]
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenGreen, {
-            //         interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent)
-            // ],
-            // [
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenPink, {
-            //         interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 1
-            //     }, eventBusComponent),
-            //     new EnemySpawnerComponent(this, ChickenEvil, {
-            //         interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
-            //         initialSpawnTime: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_START,
-            //         maxCount: 2
-            //     }, eventBusComponent)
-            // ],
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenPink, {
+                    interval: ENEMY_PINK_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: ENEMY_PINK_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenEvil, {
+                    interval: ENEMY_EVIL_CHICKEN_GROUP_SPAWN_INTERVAL,
+                    initialSpawnTime: 2000,
+                    maxCount: 2
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: 1000,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenGreen, {
+                    interval: 1000,
+                    initialSpawnTime: ENEMY_GREEN_CHICKEN_GROUP_SPAWN_START,
+                    maxCount: 1
+                }, eventBusComponent)
+            ],
+            [
+                new EnemySpawnerComponent(this, ChickenEvil, {
+                    interval: 2500,
+                    initialSpawnTime: 0,
+                    maxCount: 2
+                }, eventBusComponent),
+                new EnemySpawnerComponent(this, ChickenEvil, {
+                    interval: 3000,
+                    initialSpawnTime: 0,
+                    maxCount: 2
+                }, eventBusComponent)
+            ],
         ]);
 
         this.enemyDestroyedComponent = new EnemyDestroyedComponent(this, eventBusComponent);
@@ -225,7 +266,7 @@ export class Game extends BaseScene
 
         eventBusComponent.on(CUSTOM_EVENTS.GROUP_INIT, (group: GameObjects.Group) => 
         {
-            this.overlaps.push(this.physics.add.overlap(player, group, (playerGeneric: any, enemyGeneric: any) => {
+            this.physics.add.overlap(player, group, (playerGeneric: any, enemyGeneric: any) => {
                 if (!playerGeneric.active || !enemyGeneric.active) {
                     return;
                 }
@@ -239,9 +280,10 @@ export class Game extends BaseScene
                     const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                     colliderComponent.collideWithEnemyChicken();
                 }
-            }));
+            });
 
-            this.overlaps.push(this.physics.add.overlap(group, player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) => {
+            this.physics.add.overlap(group, player.getWeaponGameObjectGroup(), (enemyGeneric: any, playerBullet: any) => {
+                console.log(enemyGeneric.state);
                 if (!enemyGeneric.active || !playerBullet.active) {
                     return;
                 }
@@ -254,7 +296,7 @@ export class Game extends BaseScene
                 player.getWeaponComponent().destroyBullet(playerBullet);
 
                 this.enemiesDestroyed++;
-            }));
+            });
         });
 
         this.orchestrator.on(GroupEnemyOrchestrator.Events.WAVE_CHANGE, (next: EnemySpawnerComponent[] | null, previous: EnemySpawnerComponent[] | null) => 
@@ -546,119 +588,33 @@ export class Game extends BaseScene
         {
             this.tweens.killTweensOf(this.fadeOutRect);
 
-            this.tweens.add({
-                targets: this.endTextEnemiesDestroyedCategory,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 300
+            let tweens = this.scoreTweenDisplay.config.forEach((c) => 
+            {
+                this.tweens.add(c.tweenConfig);
             });
 
-            this.tweens.add({
-                targets: this.endTextEnemiesDestroyedScore,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 300
-            });
+            this.time.delayedCall(10000, () =>
+            {
+                let objects = this.scoreTweenDisplay.config.map((s) => { return s.text; } ).flat();
+                let fot = this.tweens.add(
+                    {
+                        targets: objects,
+                        alpha: { from: 1, to: 0 },
+                        ease: 'Linear',
+                        duration: 2000,
+                        repeat: 0,
+                        yoyo: false
+                    }
+                );
 
-            this.tweens.add({
-                targets: this.endTextBossDestroyedCategory,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 1300
-            });
-
-            this.tweens.add({
-                targets: this.endTextBossDestroyedScore,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 1300,
-            });
-
-            this.tweens.add({
-                targets: this.endTextLivesLostCategory,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 2300
-            });
-
-            this.tweens.add({
-                targets: this.endTextLivesLostScore,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 2300
-            });
-
-            this.tweens.add({
-                targets: this.underline,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1000,
-                repeat: 0,
-                yoyo: false,
-                delay: 2300
-            });
-
-            this.tweens.add({
-                targets: this.endTextTotalCategory,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 200,
-                repeat: 0,
-                yoyo: false,
-                delay: 3500,
-                startDelay: 3500,
-                onStart: () =>
+                fot.onCompleteHandler = () =>
                 {
-                    this.camera.shake(100, 0.001);
+                    this.tweens.killAll();
+                    this.poemTweenDisplay.config.forEach((c) => 
+                    {
+                        this.tweens.add(c.tweenConfig);
+                    });
                 }
-            });
-
-            this.tweens.add({
-                targets: this.endTextTotalScore,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 200,
-                repeat: 0,
-                yoyo: false,
-                delay: 3500
-            });
-
-            this.tweens.add({
-                targets: this.myLoveForYouCategory,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1200,
-                repeat: 0,
-                yoyo: false,
-                delay: 4000
-            });
-
-            this.tweens.add({
-                targets: this.myLoveForYouScore,
-                alpha: { from: 0, to: 1 },
-                ease: 'Linear',
-                duration: 1200,
-                repeat: 0,
-                yoyo: false,
-                delay: 4000
             });
         }
     }
@@ -689,6 +645,8 @@ export class Game extends BaseScene
 
     private createEndTextObjects()
     {
+
+
         this.endTextEnemiesDestroyedCategory = this.add.text(this.getGameWidth() * 0.27, this.getGameHeight() * 0.20, 'ENEMIES DESTROYED', {fontFamily: 'Quartz', fontSize: 36, color: '#fff'}).setAlpha(0.0).setDepth(4);
         this.endTextEnemiesDestroyedScore = this.add.text(
                                             this.getGameWidth() * 0.60, 
@@ -730,5 +688,181 @@ export class Game extends BaseScene
                                             '(∞π)²', 
                                             {fontFamily: 'Quartz', fontSize: 36, color: '#00ff00'}
                                         ).setAlign('right').setAlpha(0.0).setDepth(4);
+
+        this.scoreTweenDisplay = new TextTweenDisplay(
+            [
+                new TextTweenDisplayConfig([this.endTextEnemiesDestroyedCategory, this.endTextEnemiesDestroyedScore], 
+                                            {
+                                                targets: [this.endTextEnemiesDestroyedCategory, this.endTextEnemiesDestroyedScore],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 300
+                                            }),
+
+                new TextTweenDisplayConfig([this.endTextBossDestroyedCategory, this.endTextBossDestroyedScore], 
+                                            {
+                                                targets: [this.endTextBossDestroyedCategory, this.endTextBossDestroyedScore],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 1300
+                                            }),
+
+                new TextTweenDisplayConfig([this.endTextLivesLostCategory, this.endTextLivesLostScore], 
+                                            {
+                                                targets: [this.endTextLivesLostCategory, this.endTextLivesLostScore],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 2300
+                                            }),
+
+                new TextTweenDisplayConfig([this.endTextLivesLostCategory, this.endTextLivesLostScore, this.underline], 
+                                            {
+                                                targets: [this.endTextLivesLostCategory, this.endTextLivesLostScore, this.underline],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 2300
+                                            }),
+
+                new TextTweenDisplayConfig([this.endTextTotalCategory, this.endTextTotalScore], 
+                                            {
+                                                targets: [this.endTextTotalCategory, this.endTextTotalScore],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 200,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 3500,
+                                                startDelay: 3500,
+                                                onStart: () =>
+                                                {
+                                                    this.camera.shake(100, 0.001);
+                                                }
+                                            }),
+
+                new TextTweenDisplayConfig([this.myLoveForYouCategory, this.myLoveForYouScore], 
+                                            {
+                                                targets: [this.myLoveForYouCategory, this.myLoveForYouScore],
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1200,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 4000
+                                            })
+                
+            ]
+        );
+
+        let poemLineOne = TextUtility.addAndCenterTextWithOutline(this, 'Many moons ago to you I was introduced', {
+                    fontSize: 36,
+                    fontFamily: 'Quartz',
+                    textColor: '#ffffff',
+                    textAlign:'left',
+                }
+        ).setY(this.getGameHeight() * 0.20).setAlpha(0.0).setDepth(4);
+
+        let poemLineTwo = TextUtility.addAndCenterTextWithOutline(this, 'And in my heart you set roost', {
+                    fontSize: 36,
+                    fontFamily: 'Quartz',
+                    textColor: '#ffffff',
+                    textAlign:'left',
+                }
+        ).setY(this.getGameHeight() * 0.30).setAlpha(0.0).setDepth(4);
+
+        let poemLineThree = TextUtility.addAndCenterTextWithOutline(this, 'Never again to leave', {
+                    fontSize: 36,
+                    fontFamily: 'Quartz',
+                    textColor: '#ffffff',
+                    textAlign:'left',
+                }
+        ).setY(this.getGameHeight() * 0.40).setAlpha(0.0).setDepth(4);
+
+        let poemLineFour = TextUtility.addAndCenterTextWithOutline(this, 'A life together we will weave', {
+                    fontSize: 36,
+                    fontFamily: 'Quartz',
+                    textColor: '#ffffff',
+                    textAlign:'left',
+                }
+        ).setY(this.getGameHeight() * 0.50).setAlpha(0.0).setDepth(4);
+
+        let poemLineFive = TextUtility.addAndCenterTextWithOutline(this, 'Happy Anniversary Beautiful', {
+                    fontSize: 36,
+                    fontFamily: 'Quartz',
+                    textColor: '#00FF00',
+                    textAlign:'left',
+                }
+        ).setY(this.getGameHeight() * 0.60).setAlpha(0.0).setDepth(4);
+
+        this.poemTweenDisplay = new TextTweenDisplay(
+            [
+                new TextTweenDisplayConfig([poemLineOne], 
+                                            {
+                                                targets: poemLineOne,
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 300
+                                            }),
+
+                new TextTweenDisplayConfig([poemLineTwo], 
+                                            {
+                                                targets: poemLineTwo,
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 1300
+                                            }),
+
+                new TextTweenDisplayConfig([poemLineThree], 
+                                            {
+                                                targets: poemLineThree,
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 2300
+                                            }),
+
+                new TextTweenDisplayConfig([poemLineFour], 
+                                            {
+                                                targets: poemLineFour,
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 3300
+                                            }),
+
+                new TextTweenDisplayConfig([poemLineFive], 
+                                            {
+                                                targets: poemLineFive,
+                                                alpha: { from: 0, to: 1 },
+                                                ease: 'Linear',
+                                                duration: 1000,
+                                                repeat: 0,
+                                                yoyo: false,
+                                                delay: 4300
+                                            })
+                
+            ]
+        );
     }
 }
