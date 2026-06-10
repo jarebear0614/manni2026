@@ -102,6 +102,16 @@ export class ChickenGreen extends GameObjects.Container
         {
             return;
         }
+
+        if(!this.visible)
+        {
+            this.setVisible(true);
+        }
+
+        (!this.mainSprite.visible)
+        {
+            this.mainSprite.setVisible(true);
+        }
         
         if(this.healthComponent.isDead())
         {

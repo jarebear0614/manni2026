@@ -234,12 +234,7 @@ export class Game extends BaseScene
                 new EnemySpawnerComponent(this, ChickenEvil, {
                     interval: 2500,
                     initialSpawnTime: 0,
-                    maxCount: 2
-                }, eventBusComponent),
-                new EnemySpawnerComponent(this, ChickenEvil, {
-                    interval: 3000,
-                    initialSpawnTime: 0,
-                    maxCount: 2
+                    maxCount: 4
                 }, eventBusComponent)
             ],
             [

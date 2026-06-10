@@ -32,14 +32,14 @@ export class ChickenEvilBoss extends GameObjects.Container
     private isMovementRunning: boolean = false;
     private tinting: boolean = false;
 
-    private explosions = 50;
+    private explosions = 100;
     private explosionsSpawned = 0;
     private timeBetweenExplosions = 50;
     private currentExplosionTime = this.timeBetweenExplosions;
     private dying: boolean = false;
     private explosionGroup: GameObjects.Group;
     
-    private numberOfSounds = 5;
+    private numberOfSounds = 10;
     private soundsSpawned = 0;
     private timeBetweenSounds = 440;
     private currentExplosionSoundTime = 0;
