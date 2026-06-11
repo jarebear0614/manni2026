@@ -242,4 +242,9 @@ export class ChickenEvilBoss extends GameObjects.Container
             frameToDisappearEnemy: 2
         };
     }
+
+    public isDying()
+    {
+        return this.dying;
+    }
 }

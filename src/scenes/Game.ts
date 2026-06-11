@@ -561,10 +561,13 @@ export class Game extends BaseScene
                     {
                         const colliderComponent: ColliderComponent = enemyGeneric.getColliderComponent();
                         colliderComponent.collideWithEnemyEgg();
-                        this.sound.play('hit', { volume: 0.3 });
-                    }
 
-                    this.player.getWeaponComponent().destroyBullet(playerBullet);
+                        if(!enemyGeneric.isDying())
+                        {
+                            this.sound.play('hit', { volume: 0.3 });
+                            this.player.getWeaponComponent().destroyBullet(playerBullet);
+                        }
+                    }
                 }));
             });
         }
